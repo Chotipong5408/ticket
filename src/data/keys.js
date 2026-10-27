@@ -1,0 +1,26 @@
+export const KEYS = {
+  users: 'users',
+  sessions: 'sessions',
+  ticketTypes: 'ticket_types',
+  tickets: 'tickets',
+  orders: 'orders',
+  payments: 'payments',
+  paymentReviews: 'payment_reviews',
+  paymentSlips: 'payment_slips',
+  merchandise: 'merchandise',
+  merchandiseOrders: 'merchandise_orders',
+  tokenTransactions: 'token_transactions',
+  stores: 'stores',
+  storeProducts: 'store_products',
+  paymentRequests: 'payment_requests',
+  checkins: 'checkins',
+  permissions: 'permissions',
+  auditLogs: 'audit_logs',
+  emailOutbox: 'email_outbox',
+  settings: 'settings',
+  schemaVersion: 'schema_version',
+  carts: 'carts',
+  idempotency: 'idempotency',
+}
+
+export const SCHEMA_VERSION = 1
