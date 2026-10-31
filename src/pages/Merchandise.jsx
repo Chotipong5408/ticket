@@ -8,7 +8,7 @@ import { formatTHB } from '../lib/money'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { useLiveData } from '../hooks/useLiveData'
-import { Shirt, ShoppingCart, ArrowRight, Check, Package, Sparkles } from 'lucide-react'
+import { Shirt, ShoppingCart, ArrowRight, Check, Package, Sparkles, Ticket } from 'lucide-react'
 
 export default function Merchandise() {
   useLiveData()
@@ -48,6 +48,27 @@ export default function Merchandise() {
           </button>
         }
       />
+
+      {/* Dual Switcher: Tickets <-> Shirts */}
+      <div className="mb-8 flex justify-center">
+        <div className="inline-flex p-1.5 rounded-2xl bg-slate-100 border border-slate-200/80 shadow-inner">
+          <button
+            type="button"
+            onClick={() => nav('/tickets')}
+            className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition"
+          >
+            <Ticket className="h-4 w-4 text-slate-400" />
+            <span>← 1. ซื้อบัตรเข้างาน</span>
+          </button>
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-extrabold text-brand-700 shadow-sm"
+          >
+            <Shirt className="h-4 w-4 text-brand-600" />
+            <span>2. สั่งซื้อเสื้อที่ระลึก</span>
+          </button>
+        </div>
+      </div>
 
       {products.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center text-slate-500 max-w-md mx-auto">
