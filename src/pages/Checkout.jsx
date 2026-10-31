@@ -56,7 +56,7 @@ export default function Checkout() {
             ))}
             {quote.merchLines.length > 0 ? (
               <div className="mt-4 space-y-3">
-                <label className="flex gap-2 text-sm"><input type="radio" checked={quote.shippingMethod === 'pickup'} onChange={() => setMethod('pickup')} /> รับเสื้อภายในงาน</label>
+                {/* <label className="flex gap-2 text-sm"><input type="radio" checked={quote.shippingMethod === 'pickup'} onChange={() => setMethod('pickup')} /> รับเสื้อภายในงาน</label> */}
                 <label className="flex gap-2 text-sm"><input type="radio" checked={quote.shippingMethod === 'delivery'} onChange={() => setMethod('delivery')} /> จัดส่งตามที่อยู่</label>
                 {quote.shippingMethod === 'delivery' ? (
                   <div className="grid gap-2">
