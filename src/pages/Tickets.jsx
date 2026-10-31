@@ -5,7 +5,7 @@ import { listActiveTicketTypes } from '../services/catalogService'
 import { addTicketToCart, quoteCart } from '../services/orderService'
 import { useLiveData } from '../hooks/useLiveData'
 import { formatTHB, formatToken } from '../lib/money'
-import { Ticket, ShoppingCart, Coins, Sparkles, Check, AlertCircle, ArrowRight, Plus, Minus } from 'lucide-react'
+import { Ticket, ShoppingCart, Coins, Sparkles, Check, AlertCircle, ArrowRight, Plus, Minus, Shirt } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Tickets() {
