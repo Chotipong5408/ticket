@@ -1,27 +1,30 @@
-import { useState } from 'react'
-import { PageHeader } from '../../components/ui/PageHeader'
-import { usersRepo, storesRepo } from '../../repositories'
-import { setUserRole } from '../../services/authService'
-import { ROLE_LABELS } from '../../data/permissions'
-import { useAuth } from '../../context/AuthContext'
-import { useToast } from '../../context/ToastContext'
-import { useLiveData } from '../../hooks/useLiveData'
-import { Users, Shield, Store, Check, UserCheck } from 'lucide-react'
+import { useState } from "react";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { usersRepo, storesRepo } from "../../repositories";
+import { setUserRole } from "../../services/authService";
+import { ROLE_LABELS } from "../../data/permissions";
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
+import { useLiveData } from "../../hooks/useLiveData";
+import { Users, Shield, Store, Check, UserCheck } from "lucide-react";
 
 export default function AdminAdmins() {
-  useLiveData()
-  const { user } = useAuth()
-  const toast = useToast()
-  const [role, setRole] = useState('token_admin')
-  const [storeId, setStoreId] = useState('')
-  const people = usersRepo.all()
+  useLiveData();
+  const { user } = useAuth();
+  const toast = useToast();
+  const [role, setRole] = useState("token_admin");
+  const [storeId, setStoreId] = useState("");
+  const people = usersRepo.all();
 
   function assign(id) {
     try {
-      setUserRole(user, id, role, storeId || null)
-      toast.push(`อัปเดตบทบาทเป็น ${ROLE_LABELS[role]} เรียบร้อยแล้ว`, 'success')
+      setUserRole(user, id, role, storeId || null);
+      toast.push(
+        `อัปเดตบทบาทเป็น ${ROLE_LABELS[role]} เรียบร้อยแล้ว`,
+        "success",
+      );
     } catch (e) {
-      toast.push(e.message, 'error')
+      toast.push(e.message, "error");
     }
   }
 
@@ -29,7 +32,7 @@ export default function AdminAdmins() {
     <div className="space-y-6">
       <PageHeader
         title="จัดการบทบาทผู้ดูแลระบบ (Role Assignment)"
-        subtitle="แต่งตั้งผู้ใช้งานให้เป็น Super Admin, Token Admin หรือ Store Admin พร้อมมอบหมายร้านค้า"
+        subtitle="แต่งตั้งผู้ใช้งานให้เป็น Super Admin, Event Admin หรือ Store Admin พร้อมมอบหมายร้านค้า"
         icon={Users}
       />
 
@@ -40,8 +43,14 @@ export default function AdminAdmins() {
         </label>
         <div className="grid gap-3 sm:grid-cols-2 max-w-xl">
           <div>
-            <span className="text-[11px] text-slate-400 block mb-1">บทบาท (Role)</span>
-            <select className="input text-xs" value={role} onChange={(e) => setRole(e.target.value)}>
+            <span className="text-[11px] text-slate-400 block mb-1">
+              บทบาท (Role)
+            </span>
+            <select
+              className="input text-xs"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
               {Object.entries(ROLE_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>
                   {v}
@@ -51,12 +60,14 @@ export default function AdminAdmins() {
           </div>
 
           <div>
-            <span className="text-[11px] text-slate-400 block mb-1">ร้านค้าที่รับผิดชอบ (เฉพาะ Store Admin)</span>
+            <span className="text-[11px] text-slate-400 block mb-1">
+              ร้านค้าที่รับผิดชอบ (เฉพาะ Store Admin)
+            </span>
             <select
               className="input text-xs"
               value={storeId}
               onChange={(e) => setStoreId(e.target.value)}
-              disabled={role !== 'store_admin'}
+              disabled={role !== "store_admin"}
             >
               <option value="">- เลือกร้านค้า -</option>
               {storesRepo.all().map((s) => (
@@ -77,24 +88,36 @@ export default function AdminAdmins() {
 
         <div className="divide-y divide-slate-100">
           {people.map((p) => (
-            <div key={p.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div
+              key={p.id}
+              className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+            >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 font-bold text-xs shrink-0">
-                  {p.fullName?.charAt(0) || 'U'}
+                  {p.fullName?.charAt(0) || "U"}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-bold text-slate-800 text-xs sm:text-sm">{p.fullName}</p>
-                    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                      p.role === 'super_admin' ? 'bg-purple-100 text-purple-800' :
-                      p.role === 'token_admin' ? 'bg-amber-100 text-amber-800' :
-                      p.role === 'store_admin' ? 'bg-blue-100 text-blue-800' :
-                      'bg-slate-100 text-slate-600'
-                    }`}>
+                    <p className="font-bold text-slate-800 text-xs sm:text-sm">
+                      {p.fullName}
+                    </p>
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                        p.role === "super_admin"
+                          ? "bg-purple-100 text-purple-800"
+                          : p.role === "token_admin"
+                            ? "bg-amber-100 text-amber-800"
+                            : p.role === "store_admin"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
                       {ROLE_LABELS[p.role]}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-400 font-mono mt-0.5">{p.email}</p>
+                  <p className="text-[11px] text-slate-400 font-mono mt-0.5">
+                    {p.email}
+                  </p>
                 </div>
               </div>
 
@@ -110,5 +133,5 @@ export default function AdminAdmins() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { DEMO_PASSWORD } from '../data/seed'
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { DEMO_PASSWORD } from "../data/seed";
 import {
   Ticket,
   Shirt,
@@ -16,69 +16,93 @@ import {
   CheckCircle2,
   Calendar,
   MapPin,
-  Clock
-} from 'lucide-react'
+  Clock,
+} from "lucide-react";
 
 const steps = [
   {
     icon: GraduationCap,
-    step: '01',
-    title: 'ข้อมูลผู้ใช้',
-    desc: 'ลงทะเบียนเข้าสู่ระบบศิษย์เก่า',
-    to: '/register',
-    color: 'from-blue-500 to-indigo-600',
+    step: "01",
+    title: "ข้อมูลผู้ใช้",
+    desc: "ลงทะเบียนเข้าสู่ระบบศิษย์เก่า",
+    to: "/register",
+    color: "from-blue-500 to-indigo-600",
   },
   {
     icon: Ticket,
-    step: '02',
-    title: 'เลือกซื้อบัตร',
-    desc: 'เลือกบัตรเข้างานตามประเภทที่ต้องการ',
-    to: '/tickets',
-    color: 'from-indigo-500 to-purple-600',
+    step: "02",
+    title: "เลือกซื้อบัตร",
+    desc: "เลือกบัตรเข้างานตามประเภทที่ต้องการ",
+    to: "/tickets",
+    color: "from-indigo-500 to-purple-600",
   },
   {
     icon: Shirt,
-    step: '03',
-    title: 'เสื้อที่ระลึก',
-    desc: 'เลือกไซส์และสั่งเสื้อรุ่นพิเศษ 2026',
-    to: '/merchandise',
-    color: 'from-purple-500 to-pink-600',
+    step: "03",
+    title: "เสื้อที่ระลึก",
+    desc: "เลือกไซส์และสั่งเสื้อรุ่นพิเศษ 2026",
+    to: "/merchandise",
+    color: "from-purple-500 to-pink-600",
   },
   {
     icon: CreditCard,
-    step: '04',
-    title: 'ชำระเงิน',
-    desc: 'สแกน Thai QR พร้อมแนบสลิปโอนเงิน',
-    to: '/tickets',
-    color: 'from-amber-500 to-orange-600',
+    step: "04",
+    title: "ชำระเงิน",
+    desc: "สแกน Thai QR พร้อมแนบสลิปโอนเงิน",
+    to: "/tickets",
+    color: "from-amber-500 to-orange-600",
   },
   {
     icon: QrCode,
-    step: '05',
-    title: 'รับ QR Ticket',
-    desc: 'รับบัตรเข้างานดิจิทัลหลัง Admin อนุมัติ',
-    to: '/account/tickets',
-    color: 'from-emerald-500 to-teal-600',
+    step: "05",
+    title: "รับ QR Ticket",
+    desc: "รับบัตรเข้างานดิจิทัลหลัง Admin อนุมัติ",
+    to: "/account/tickets",
+    color: "from-emerald-500 to-teal-600",
   },
   {
     icon: Coins,
-    step: '06',
-    title: 'ใช้ Token ในงาน',
-    desc: 'สแกนซื้ออาหาร เครื่องดื่ม ร้านค้าภายในงาน',
-    to: '/account/wallet',
-    color: 'from-cyan-500 to-blue-600',
+    step: "06",
+    title: "ใช้ Token ในงาน",
+    desc: "สแกนซื้ออาหาร เครื่องดื่ม ร้านค้าภายในงาน",
+    to: "/account/wallet",
+    color: "from-cyan-500 to-blue-600",
   },
-]
+];
 
 const demoAccounts = [
-  { label: 'ผู้ใช้ทั่วไป (User)', email: 'user@demo.com', role: 'user', badge: 'ผู้เข้าร่วมงาน', desc: 'ซื้อบัตร, สั่งเสื้อ, ดู QR Ticket, ใช้ Wallet' },
-  { label: 'Super Admin', email: 'superadmin@demo.com', role: 'super_admin', badge: 'ผู้ดูแลสูงสุด', desc: 'ตรวจสลิป, อนุมัติบัตร, รายงาน, สแกน Check-in' },
-  { label: 'Token Admin', email: 'tokenadmin@demo.com', role: 'token_admin', badge: 'จุดเติมเงิน', desc: 'จุดบริการเติม Token ให้ผู้ร่วมงาน' },
-  { label: 'Store Admin', email: 'store1@demo.com', role: 'store_admin', badge: 'ร้านค้าในงาน', desc: 'สร้าง QR ขายของ, รับชำระด้วย Token' },
-]
+  {
+    label: "ผู้ใช้ทั่วไป (User)",
+    email: "user@demo.com",
+    role: "user",
+    badge: "ผู้เข้าร่วมงาน",
+    desc: "ซื้อบัตร, สั่งเสื้อ, ดู QR Ticket, ใช้ Wallet",
+  },
+  {
+    label: "Super Admin",
+    email: "superadmin@demo.com",
+    role: "super_admin",
+    badge: "ผู้ดูแลสูงสุด",
+    desc: "ตรวจสลิป, อนุมัติบัตร, รายงาน, สแกน Check-in",
+  },
+  {
+    label: "Event Admin",
+    email: "tokenadmin@demo.com",
+    role: "token_admin",
+    badge: "จุดเติมเงิน",
+    desc: "จุดบริการเติม Token ให้ผู้ร่วมงาน",
+  },
+  {
+    label: "Store Admin",
+    email: "store1@demo.com",
+    role: "store_admin",
+    badge: "ร้านค้าในงาน",
+    desc: "สร้าง QR ขายของ, รับชำระด้วย Token",
+  },
+];
 
 export default function Home() {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   return (
     <div className="space-y-16 pb-16">
@@ -96,11 +120,15 @@ export default function Home() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
-            งานเลี้ยงรุ่นศิษย์เก่า <span className="bg-gradient-to-r from-brand-200 via-sky-200 to-white bg-clip-text text-transparent">2026</span>
+            งานเลี้ยงรุ่นศิษย์เก่า{" "}
+            <span className="bg-gradient-to-r from-brand-200 via-sky-200 to-white bg-clip-text text-transparent">
+              2026
+            </span>
           </h1>
 
           <p className="text-base sm:text-lg md:text-xl text-slate-300 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
-            ร่วมย้อนวันวานพบปะเพื่อนร่วมรุ่น สะดวก รวดเร็ว ด้วยระบบบัตรดิจิทัล QR Ticket พร้อมระบบกระเป๋าเงิน Token ไร้เงินสดภายในงาน
+            ร่วมย้อนวันวานพบปะเพื่อนร่วมรุ่น สะดวก รวดเร็ว ด้วยระบบบัตรดิจิทัล
+            QR Ticket พร้อมระบบกระเป๋าเงิน Token ไร้เงินสดภายในงาน
           </p>
 
           {/* Event Quick Badges */}
@@ -169,7 +197,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {steps.map((s) => {
-            const Icon = s.icon
+            const Icon = s.icon;
             return (
               <Link
                 key={s.step}
@@ -178,7 +206,9 @@ export default function Home() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr ${s.color} text-white shadow-md shadow-brand-500/10 group-hover:scale-110 transition-transform duration-300`}>
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr ${s.color} text-white shadow-md shadow-brand-500/10 group-hover:scale-110 transition-transform duration-300`}
+                    >
                       <Icon className="h-6 w-6" />
                     </div>
                     <span className="font-mono text-2xl font-black text-slate-200 group-hover:text-brand-500 transition-colors">
@@ -188,13 +218,15 @@ export default function Home() {
                   <h3 className="text-base font-bold text-slate-800 mb-1.5 group-hover:text-brand-600 transition-colors">
                     {s.title}
                   </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">{s.desc}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {s.desc}
+                  </p>
                 </div>
                 <div className="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-semibold text-brand-600 opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
                   ดำเนินการ <ArrowRight className="h-3.5 w-3.5 ml-1" />
                 </div>
               </Link>
-            )
+            );
           })}
         </div>
       </section>
@@ -207,9 +239,13 @@ export default function Home() {
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 mb-4 border border-amber-200/60">
               <Store className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">ระบบ Token & ร้านค้าในงาน</h3>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">
+              ระบบ Token & ร้านค้าในงาน
+            </h3>
             <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-              ไม่ต้องพกเงินสดให้ยุ่งยาก รับ Token โบนัสทันทีเมื่อซื้อบัตร และเติมเงินได้ที่จุดบริการ สแกน QR ชำระค่าอาหาร เครื่องดื่ม และของที่ระลึกได้ทันที
+              ไม่ต้องพกเงินสดให้ยุ่งยาก รับ Token โบนัสทันทีเมื่อซื้อบัตร
+              และเติมเงินได้ที่จุดบริการ สแกน QR ชำระค่าอาหาร เครื่องดื่ม
+              และของที่ระลึกได้ทันที
             </p>
             <div className="flex items-center gap-3">
               <Link
@@ -232,9 +268,13 @@ export default function Home() {
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-600 mb-4 border border-brand-200/60">
               <BarChart3 className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">ระบบจัดการและตรวจสอบ Real-time</h3>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">
+              ระบบจัดการและตรวจสอบ Real-time
+            </h3>
             <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-              Super Admin สามารถตรวจสอบสลิปโอนเงิน อนุมัติบัตรอัตโนมัติ สแกน Check-in ผู้เข้าร่วมหน้างาน พร้อมรายงานสรุปรายได้แยกหมวดหมู่อย่างโปร่งใส
+              Super Admin สามารถตรวจสอบสลิปโอนเงิน อนุมัติบัตรอัตโนมัติ สแกน
+              Check-in ผู้เข้าร่วมหน้างาน
+              พร้อมรายงานสรุปรายได้แยกหมวดหมู่อย่างโปร่งใส
             </p>
             <div className="flex items-center gap-3">
               <Link
@@ -266,7 +306,7 @@ export default function Home() {
               บัญชี Demo สำหรับทดลองใช้งาน
             </h2>
             <p className="text-slate-500 text-sm mt-1">
-              คลิกปุ่มเข้าสู่ระบบของแต่ละบทบาท หรือใช้รหัสผ่านกลาง:{' '}
+              คลิกปุ่มเข้าสู่ระบบของแต่ละบทบาท หรือใช้รหัสผ่านกลาง:{" "}
               <code className="bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md text-brand-700 font-mono font-bold">
                 {DEMO_PASSWORD}
               </code>
@@ -289,7 +329,9 @@ export default function Home() {
                   <p className="text-xs text-slate-500 mb-3 font-mono bg-white/80 border border-slate-200/50 rounded-lg px-2.5 py-1 inline-block">
                     {a.email}
                   </p>
-                  <p className="text-xs text-slate-500 leading-relaxed mb-4">{a.desc}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                    {a.desc}
+                  </p>
                 </div>
                 <Link
                   to="/login"
@@ -304,12 +346,14 @@ export default function Home() {
           <div className="mt-8 rounded-2xl bg-amber-50/80 border border-amber-200/80 p-4 text-xs text-amber-800 flex items-start gap-3">
             <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
             <div>
-              <strong>หมายเหตุการทำงาน:</strong> ข้อมูลทั้งหมดในระบบ Demo นี้จำลองและจัดเก็บอยู่ในพื้นที่ Browser
-              (LocalStorage & IndexedDB) ของเครื่องคุณ จึงสามารถทดสอบ ซื้อบัตร แนบสลิป ตรวจสอบ และชำระ Token ได้อย่างสมบูรณ์แบบโดยไม่ต้องต่อฐานข้อมูลภายนอก
+              <strong>หมายเหตุการทำงาน:</strong> ข้อมูลทั้งหมดในระบบ Demo
+              นี้จำลองและจัดเก็บอยู่ในพื้นที่ Browser (LocalStorage & IndexedDB)
+              ของเครื่องคุณ จึงสามารถทดสอบ ซื้อบัตร แนบสลิป ตรวจสอบ และชำระ
+              Token ได้อย่างสมบูรณ์แบบโดยไม่ต้องต่อฐานข้อมูลภายนอก
             </div>
           </div>
         </div>
       </section>
     </div>
-  )
+  );
 }

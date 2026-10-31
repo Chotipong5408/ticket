@@ -1,19 +1,19 @@
-import { useState } from 'react'
-import { PageHeader } from '../../components/ui/PageHeader'
-import { settingsRepo } from '../../repositories'
-import { saveSettings } from '../../services/catalogService'
-import { useAuth } from '../../context/AuthContext'
-import { useToast } from '../../context/ToastContext'
-import { useLiveData } from '../../hooks/useLiveData'
-import { Coins, Save, Plus, Package } from 'lucide-react'
+import { useState } from "react";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { settingsRepo } from "../../repositories";
+import { saveSettings } from "../../services/catalogService";
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
+import { useLiveData } from "../../hooks/useLiveData";
+import { Coins, Save, Plus, Package } from "lucide-react";
 
 export default function TokenSettings() {
-  useLiveData()
-  const { user } = useAuth()
-  const toast = useToast()
-  const s = settingsRepo.get()
-  const [price, setPrice] = useState(s.tokenPriceTHB)
-  const [packages, setPackages] = useState(s.tokenPackages || [])
+  useLiveData();
+  const { user } = useAuth();
+  const toast = useToast();
+  const s = settingsRepo.get();
+  const [price, setPrice] = useState(s.tokenPriceTHB);
+  const [packages, setPackages] = useState(s.tokenPackages || []);
 
   function save() {
     try {
@@ -24,10 +24,13 @@ export default function TokenSettings() {
           tokens: Number(p.tokens),
           price: Number(p.price),
         })),
-      })
-      toast.push('บันทึกการตั้งค่าราคาและแพ็กเกจ Token เรียบร้อยแล้ว', 'success')
+      });
+      toast.push(
+        "บันทึกการตั้งค่าราคาและแพ็กเกจ Token เรียบร้อยแล้ว",
+        "success",
+      );
     } catch (e) {
-      toast.push(e.message, 'error')
+      toast.push(e.message, "error");
     }
   }
 
@@ -35,7 +38,7 @@ export default function TokenSettings() {
     <div className="space-y-6 max-w-2xl">
       <PageHeader
         title="ตั้งค่าราคาและแพ็กเกจ Token"
-        subtitle="กำหนดอัตราแลกเปลี่ยน Token ต่อบาท และแพ็กเกจสำหรับจุดบริการเติมเงิน (Token Admin)"
+        subtitle="กำหนดอัตราแลกเปลี่ยน Token ต่อบาท และแพ็กเกจสำหรับจุดบริการเติมเงิน (Event Admin)"
         icon={Coins}
       />
 
@@ -51,9 +54,13 @@ export default function TokenSettings() {
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
-            <span className="absolute right-3 top-2.5 text-xs font-semibold text-slate-400">บาท</span>
+            <span className="absolute right-3 top-2.5 text-xs font-semibold text-slate-400">
+              บาท
+            </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">ใช้สำหรับการคำนวณราคาเริ่มต้นและรายงานสถิติ</p>
+          <p className="text-[11px] text-slate-400 mt-1">
+            ใช้สำหรับการคำนวณราคาเริ่มต้นและรายงานสถิติ
+          </p>
         </div>
 
         <div className="pt-4 border-t border-slate-100">
@@ -75,7 +82,9 @@ export default function TokenSettings() {
                   value={p.tokens}
                   onChange={(e) =>
                     setPackages(
-                      packages.map((x, idx) => (idx === i ? { ...x, tokens: e.target.value } : x))
+                      packages.map((x, idx) =>
+                        idx === i ? { ...x, tokens: e.target.value } : x,
+                      ),
                     )
                   }
                 />
@@ -85,7 +94,9 @@ export default function TokenSettings() {
                   value={p.price}
                   onChange={(e) =>
                     setPackages(
-                      packages.map((x, idx) => (idx === i ? { ...x, price: e.target.value } : x))
+                      packages.map((x, idx) =>
+                        idx === i ? { ...x, price: e.target.value } : x,
+                      ),
                     )
                   }
                 />
@@ -95,11 +106,15 @@ export default function TokenSettings() {
         </div>
 
         <div className="pt-4 border-t border-slate-100">
-          <button className="btn-primary w-full py-3 text-xs font-bold gap-2" type="button" onClick={save}>
+          <button
+            className="btn-primary w-full py-3 text-xs font-bold gap-2"
+            type="button"
+            onClick={save}
+          >
             <Save className="h-4 w-4" /> บันทึกการตั้งค่า Token
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }

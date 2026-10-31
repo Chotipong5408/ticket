@@ -19,7 +19,7 @@ export const PERMS = {
 export const ROLE_LABELS = {
   user: 'ผู้ใช้',
   super_admin: 'Super Admin',
-  token_admin: 'Token Admin',
+  token_admin: 'Event Admin',
   store_admin: 'Store Admin',
 }
 

@@ -1,16 +1,25 @@
-import { PageHeader } from '../../components/ui/PageHeader'
-import { tokensRepo } from '../../repositories'
-import { useAuth } from '../../context/AuthContext'
-import { formatToken } from '../../lib/money'
-import { useLiveData } from '../../hooks/useLiveData'
-import { Coins, CircleDollarSign, ScanLine, History, ArrowRight, ShieldCheck } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { PageHeader } from "../../components/ui/PageHeader";
+import { tokensRepo } from "../../repositories";
+import { useAuth } from "../../context/AuthContext";
+import { formatToken } from "../../lib/money";
+import { useLiveData } from "../../hooks/useLiveData";
+import {
+  Coins,
+  CircleDollarSign,
+  ScanLine,
+  History,
+  ArrowRight,
+  ShieldCheck,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function TokenDashboard() {
-  useLiveData()
-  const { user } = useAuth()
-  const mine = tokensRepo.all().filter((t) => t.type === 'topup' && t.actorId === user.id)
-  const totalTopup = mine.reduce((s, t) => s + t.amount, 0)
+  useLiveData();
+  const { user } = useAuth();
+  const mine = tokensRepo
+    .all()
+    .filter((t) => t.type === "topup" && t.actorId === user.id);
+  const totalTopup = mine.reduce((s, t) => s + t.amount, 0);
 
   return (
     <div className="space-y-6">
@@ -23,13 +32,19 @@ export default function TokenDashboard() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight">จุดบริการเติม Token</h1>
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight">
+                  จุดบริการเติม Token
+                </h1>
                 <span className="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
-                  Token Admin
+                  Event Admin
                 </span>
               </div>
               <p className="text-xs text-slate-300 mt-1">
-                เจ้าหน้าที่จุดบริการ: <span className="font-semibold text-white">{user.fullName}</span> ({user.email})
+                เจ้าหน้าที่จุดบริการ:{" "}
+                <span className="font-semibold text-white">
+                  {user.fullName}
+                </span>{" "}
+                ({user.email})
               </p>
             </div>
           </div>
@@ -61,27 +76,40 @@ export default function TokenDashboard() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">จำนวนครั้งที่เติม</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              จำนวนครั้งที่เติม
+            </span>
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 border border-blue-200/60">
               <History className="h-5 w-5" />
             </div>
           </div>
           <div>
-            <p className="text-3xl font-black text-slate-900 tracking-tight">{mine.length} <span className="text-sm font-normal text-slate-400">ครั้ง</span></p>
-            <p className="text-xs text-blue-600 font-medium mt-1">บันทึกผ่านบัญชีนี้</p>
+            <p className="text-3xl font-black text-slate-900 tracking-tight">
+              {mine.length}{" "}
+              <span className="text-sm font-normal text-slate-400">ครั้ง</span>
+            </p>
+            <p className="text-xs text-blue-600 font-medium mt-1">
+              บันทึกผ่านบัญชีนี้
+            </p>
           </div>
         </div>
 
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">ยอด Token ที่เติมรวม</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              ยอด Token ที่เติมรวม
+            </span>
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60">
               <Coins className="h-5 w-5" />
             </div>
           </div>
           <div>
-            <p className="text-3xl font-black text-slate-900 tracking-tight">{formatToken(totalTopup)}</p>
-            <p className="text-xs text-amber-600 font-medium mt-1">Token หมุนเวียนเข้าระบบ</p>
+            <p className="text-3xl font-black text-slate-900 tracking-tight">
+              {formatToken(totalTopup)}
+            </p>
+            <p className="text-xs text-amber-600 font-medium mt-1">
+              Token หมุนเวียนเข้าระบบ
+            </p>
           </div>
         </div>
       </div>
@@ -100,7 +128,9 @@ export default function TokenDashboard() {
               <h3 className="font-bold text-slate-800 text-sm group-hover:text-amber-600 transition-colors">
                 ทำรายการเติม Token
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">ค้นหาผู้ใช้จาก QR หรืออีเมล และเติมแพ็กเกจ</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                ค้นหาผู้ใช้จาก QR หรืออีเมล และเติมแพ็กเกจ
+              </p>
             </div>
           </div>
           <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
@@ -118,12 +148,14 @@ export default function TokenDashboard() {
               <h3 className="font-bold text-slate-800 text-sm group-hover:text-brand-600 transition-colors">
                 ประวัติธุรกรรมที่บันทึก
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">ตรวจสอบบันทึกการเติมเงินสดและยอดรับเงิน</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                ตรวจสอบบันทึกการเติมเงินสดและยอดรับเงิน
+              </p>
             </div>
           </div>
           <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-brand-600 group-hover:translate-x-1 transition-all" />
         </Link>
       </div>
     </div>
-  )
+  );
 }
