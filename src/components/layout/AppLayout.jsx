@@ -5,73 +5,80 @@ import { ROLE_LABELS } from '../../data/permissions'
 import {
   GraduationCap, LayoutDashboard, Users, Ticket, ShoppingCart, CreditCard,
   ShieldCheck, Store, Coins, ScanLine, BarChart3, FileText, Settings,
-  User, Wallet, History, Shirt, QrCode, LogOut, Menu, X, ChevronDown,
-  Package, BadgeCheck, CircleDollarSign
+  User, Wallet, History, Shirt, QrCode, LogOut, Menu, X, ChevronRight,
+  Package, BadgeCheck, CircleDollarSign, ArrowUpRight
 } from 'lucide-react'
 
 const NAV = {
   user: [
-    { label: 'หน้าหลัก', to: '/account', icon: User },
+    { label: 'ภาพรวมบัญชี', to: '/account', icon: LayoutDashboard },
     { label: 'ข้อมูลส่วนตัว', to: '/account/profile', icon: User },
     { label: 'คำสั่งซื้อ', to: '/account/orders', icon: ShoppingCart },
-    { label: 'บัตรของฉัน', to: '/account/tickets', icon: Ticket },
-    { label: 'Wallet', to: '/account/wallet', icon: Wallet },
+    { label: 'บัตรของฉัน (QR)', to: '/account/tickets', icon: Ticket },
+    { label: 'Token Wallet', to: '/account/wallet', icon: Wallet },
     { label: 'ประวัติ Token', to: '/account/transactions', icon: History },
-    { label: 'เสื้อของฉัน', to: '/account/merchandise', icon: Shirt },
+    { label: 'เสื้อที่สั่งซื้อ', to: '/account/merchandise', icon: Shirt },
   ],
   super_admin: [
     { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'ผู้ใช้', to: '/admin/users', icon: Users },
+    { label: 'ผู้ใช้ทั้งหมด', to: '/admin/users', icon: Users },
     { label: 'ประเภทบัตร', to: '/admin/tickets', icon: Ticket },
     { label: 'คำสั่งซื้อ', to: '/admin/orders', icon: ShoppingCart },
     { label: 'ตรวจสอบชำระเงิน', to: '/admin/payment-verification', icon: ShieldCheck },
     { label: 'รายการชำระเงิน', to: '/admin/payments', icon: CreditCard },
-    { label: 'เสื้อ/สินค้า', to: '/admin/merchandise', icon: Shirt },
-    { label: 'ร้านค้า', to: '/admin/stores', icon: Store },
+    { label: 'เสื้อ / สินค้า', to: '/admin/merchandise', icon: Shirt },
+    { label: 'ร้านค้าในงาน', to: '/admin/stores', icon: Store },
     { label: 'จัดการ Admin', to: '/admin/admins', icon: Users },
-    { label: 'สิทธิ์', to: '/admin/permissions', icon: BadgeCheck },
+    { label: 'สิทธิ์ระบบ', to: '/admin/permissions', icon: BadgeCheck },
     { label: 'ตั้งค่า Token', to: '/admin/token-settings', icon: Coins },
-    { label: 'Check-in', to: '/admin/checkin', icon: ScanLine },
-    { label: 'รายงาน', to: '/admin/reports', icon: BarChart3 },
-    { label: 'Audit Log', to: '/admin/audit-logs', icon: FileText },
+    { label: 'Check-in หน้างาน', to: '/admin/checkin', icon: ScanLine },
+    { label: 'รายงานยอดขาย', to: '/admin/reports', icon: BarChart3 },
+    { label: 'Audit Logs', to: '/admin/audit-logs', icon: FileText },
     { label: 'ตั้งค่าระบบ', to: '/admin/settings', icon: Settings },
   ],
   token_admin: [
     { label: 'Dashboard', to: '/token-admin/dashboard', icon: LayoutDashboard },
     { label: 'เติม Token', to: '/token-admin/topup', icon: CircleDollarSign },
     { label: 'ประวัติธุรกรรม', to: '/token-admin/transactions', icon: History },
-    { label: 'สแกน QR', to: '/token-admin/scan', icon: ScanLine },
+    { label: 'สแกน QR ผู้ใช้', to: '/token-admin/scan', icon: ScanLine },
   ],
   store_admin: [
     { label: 'Dashboard', to: '/store/dashboard', icon: LayoutDashboard },
-    { label: 'สินค้า', to: '/store/product', icon: Package },
+    { label: 'จัดการสินค้า', to: '/store/product', icon: Package },
     { label: 'สร้าง QR ขาย', to: '/store/payment-requests', icon: QrCode },
-    { label: 'สแกนชำระ', to: '/store/scan-payment', icon: ScanLine },
-    { label: 'ธุรกรรม', to: '/store/transactions', icon: History },
-    { label: 'รายงาน', to: '/store/reports', icon: BarChart3 },
+    { label: 'สแกนรับชำระ', to: '/store/scan-payment', icon: ScanLine },
+    { label: 'ประวัติธุรกรรม', to: '/store/transactions', icon: History },
+    { label: 'รายงานร้านค้า', to: '/store/reports', icon: BarChart3 },
   ],
 }
 
 function SidebarLinks({ items, pathname, onClick }) {
-  return items.map((item) => {
-    const Icon = item.icon
-    const active = pathname === item.to
-    return (
-      <Link
-        key={item.to}
-        to={item.to}
-        onClick={onClick}
-        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
-          active
-            ? 'bg-brand-600 text-white shadow-sm'
-            : 'text-slate-600 hover:bg-slate-100 hover:text-brand-700'
-        }`}
-      >
-        <Icon className="h-4 w-4 shrink-0" />
-        {item.label}
-      </Link>
-    )
-  })
+  return (
+    <div className="space-y-1">
+      {items.map((item) => {
+        const Icon = item.icon
+        const active = pathname === item.to
+        return (
+          <Link
+            key={item.to}
+            to={item.to}
+            onClick={onClick}
+            className={`group flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all ${
+              active
+                ? 'bg-gradient-to-r from-brand-600 to-brand-700 text-white shadow-sm shadow-brand-500/20'
+                : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+            }`}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <Icon className={`h-4 w-4 shrink-0 transition-transform ${active ? 'text-white' : 'text-slate-400 group-hover:text-brand-600'}`} />
+              <span className="truncate">{item.label}</span>
+            </div>
+            {active && <ChevronRight className="h-3.5 w-3.5 text-white/70 shrink-0" />}
+          </Link>
+        )
+      })}
+    </div>
+  )
 }
 
 export default function AppLayout() {
@@ -90,62 +97,144 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50/80">
       {/* Sidebar overlay mobile */}
-      {open && <div className="fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={() => setOpen(false)} />}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden transition-opacity"
+          onClick={() => setOpen(false)}
+        />
+      )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white border-r border-slate-200 transition-transform lg:relative lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 transform bg-white border-r border-slate-200/80 shadow-xl lg:shadow-none transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+          open ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div className="flex h-full flex-col">
-          <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-4">
-            <GraduationCap className="h-6 w-6 text-brand-600" />
-            <span className="font-bold text-brand-800">เลี้ยงรุ่น 2026</span>
-            <button className="ml-auto lg:hidden" onClick={() => setOpen(false)}><X className="h-5 w-5" /></button>
+          {/* Logo / Header */}
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white shadow-sm group-hover:scale-105 transition">
+                <GraduationCap className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="font-bold text-slate-800 leading-tight block">เลี้ยงรุ่น 2026</span>
+                <span className="text-[11px] text-slate-400 font-medium">ระบบลงทะเบียน & บัตร</span>
+              </div>
+            </Link>
+            <button
+              className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+              onClick={() => setOpen(false)}
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+
+          {/* Navigation Links */}
+          <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
             {role !== 'user' && (
-              <>
-                <p className="px-3 pt-2 pb-1 text-xs font-semibold text-slate-400 uppercase">{ROLE_LABELS[role]}</p>
+              <div>
+                <div className="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  {ROLE_LABELS[role]}
+                </div>
                 <SidebarLinks items={roleItems} pathname={location.pathname} onClick={() => setOpen(false)} />
-                <hr className="my-3 border-slate-200" />
-                <p className="px-3 pt-2 pb-1 text-xs font-semibold text-slate-400 uppercase">บัญชีของฉัน</p>
+                <div className="my-4 border-t border-slate-100" />
+                <div className="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  บัญชีผู้ใช้งาน
+                </div>
                 <SidebarLinks items={accountItems} pathname={location.pathname} onClick={() => setOpen(false)} />
-              </>
+              </div>
             )}
             {role === 'user' && (
-              <SidebarLinks items={NAV.user} pathname={location.pathname} onClick={() => setOpen(false)} />
+              <div>
+                <div className="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  เมนูหลัก
+                </div>
+                <SidebarLinks items={NAV.user} pathname={location.pathname} onClick={() => setOpen(false)} />
+              </div>
             )}
           </nav>
-          <div className="border-t border-slate-200 p-3">
-            <Link to="/tickets" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 transition">
-              <Ticket className="h-4 w-4" /> ซื้อบัตร
-            </Link>
-            <Link to="/merchandise" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 transition">
-              <Shirt className="h-4 w-4" /> เสื้อที่ระลึก
-            </Link>
-            <button onClick={handleLogout} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition">
+
+          {/* Bottom Store & Logout Links */}
+          <div className="border-t border-slate-100 p-4 space-y-1 bg-slate-50/50">
+            <div className="grid grid-cols-2 gap-1.5 mb-2">
+              <Link
+                to="/tickets"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition"
+              >
+                <Ticket className="h-3.5 w-3.5 text-brand-600" /> ซื้อบัตร
+              </Link>
+              <Link
+                to="/merchandise"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition"
+              >
+                <Shirt className="h-3.5 w-3.5 text-brand-600" /> เสื้อที่ระลึก
+              </Link>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+            >
               <LogOut className="h-4 w-4" /> ออกจากระบบ
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Main area */}
+      {/* Main Container */}
       <div className="flex flex-1 flex-col min-w-0">
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-slate-200 bg-white/80 backdrop-blur px-4 py-3">
-          <button className="lg:hidden" onClick={() => setOpen(true)}><Menu className="h-5 w-5" /></button>
-          <div className="flex-1" />
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <User className="h-4 w-4" />
-            <span className="font-medium">{user?.fullName}</span>
-            <span className="rounded bg-brand-100 px-2 py-0.5 text-xs font-medium text-brand-700">{ROLE_LABELS[role]}</span>
+        {/* Top Header */}
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/80 backdrop-blur-md px-4 md:px-8 py-3.5">
+          <div className="flex items-center gap-3">
+            <button
+              className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition"
+              onClick={() => setOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <span className="hidden sm:inline-block text-xs font-medium text-slate-400">
+              งานเลี้ยงรุ่นศิษย์เก่า 2026
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-brand-600 transition"
+            >
+              หน้าแรกเว็บ <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+
+            <div className="flex items-center gap-2.5 pl-1">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-brand-600 to-indigo-500 text-white text-xs font-bold shadow-sm">
+                {user?.fullName?.charAt(0) || 'U'}
+              </div>
+              <div className="text-left hidden md:block">
+                <p className="text-xs font-semibold text-slate-800 leading-tight">{user?.fullName}</p>
+                <p className="text-[10px] text-slate-400 leading-tight font-mono">{user?.email}</p>
+              </div>
+              <span className="rounded-full bg-brand-50 border border-brand-200/60 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700">
+                {ROLE_LABELS[role]}
+              </span>
+            </div>
           </div>
         </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
+
+        {/* Content Body */}
+        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto animate-fade-in">
           <Outlet />
         </main>
-        <footer className="border-t border-slate-200 bg-white px-4 py-3 text-center text-xs text-slate-400">
-          ระบบ Demo — ข้อมูลจัดเก็บใน Browser เท่านั้น
+
+        {/* Footer */}
+        <footer className="border-t border-slate-200/60 bg-white/50 px-6 py-4 text-center text-xs text-slate-400">
+          ระบบ Demo — บันทึกข้อมูลและประมวลผลภายใน Browser (LocalStorage & IndexedDB)
         </footer>
       </div>
     </div>
