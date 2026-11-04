@@ -1,12 +1,34 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { PageHeader } from '../components/ui/PageHeader'
+import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
-import { quoteCart, updateCart, checkout } from '../services/orderService'
+import {
+  quoteCart,
+  updateCart,
+  checkout,
+  clearCart,
+  updateTicketQuantity,
+  removeTicketFromCart,
+  updateMerchQuantity,
+  removeMerchFromCart,
+} from '../services/orderService'
 import { formatTHB, formatToken } from '../lib/money'
 import { useLiveData } from '../hooks/useLiveData'
-import { ShoppingCart, Ticket, Shirt, Truck, Coins, ArrowRight, ShieldCheck, ChevronLeft } from 'lucide-react'
+import {
+  ShoppingCart,
+  Ticket,
+  Shirt,
+  Truck,
+  Coins,
+  ArrowRight,
+  ShieldCheck,
+  ChevronLeft,
+  Plus,
+  Minus,
+  Trash2,
+} from 'lucide-react'
 
 export default function Checkout() {
   useLiveData()
@@ -14,6 +36,7 @@ export default function Checkout() {
   const toast = useToast()
   const nav = useNavigate()
   const quote = quoteCart(user.id)
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false)
   const [ship, setShip] = useState(
     quote.cart.shipping || {
       recipientName: user.fullName || '',
@@ -24,14 +47,60 @@ export default function Checkout() {
     }
   )
 
-  function setMethod(method) {
-    updateCart(user.id, { ...quote.cart, shippingMethod: method, shipping: ship })
-  }
-
   function saveShip(e) {
     const next = { ...ship, [e.target.name]: e.target.value }
     setShip(next)
     updateCart(user.id, { ...quote.cart, shipping: next })
+  }
+
+  const handleUpdateTicketQty = (ticketTypeId, nextQty) => {
+    if (nextQty <= 0) {
+      handleRemoveTicket(ticketTypeId)
+      return
+    }
+    try {
+      updateTicketQuantity(user.id, ticketTypeId, nextQty)
+    } catch (err) {
+      toast.push(err.message, 'error')
+    }
+  }
+
+  const handleRemoveTicket = (ticketTypeId) => {
+    try {
+      removeTicketFromCart(user.id, ticketTypeId)
+    } catch (err) {
+      toast.push(err.message, 'error')
+    }
+  }
+
+  const handleUpdateMerchQty = (productId, size, nextQty) => {
+    if (nextQty <= 0) {
+      handleRemoveMerch(productId, size)
+      return
+    }
+    try {
+      updateMerchQuantity(user.id, productId, size, nextQty)
+    } catch (err) {
+      toast.push(err.message, 'error')
+    }
+  }
+
+  const handleRemoveMerch = (productId, size) => {
+    try {
+      removeMerchFromCart(user.id, productId, size)
+    } catch (err) {
+      toast.push(err.message, 'error')
+    }
+  }
+
+  const handleClearCart = () => {
+    try {
+      clearCart(user.id)
+      setConfirmClearOpen(false)
+      toast.push('ล้างรายการทั้งหมดในตะกร้าเรียบร้อยแล้ว', 'success')
+    } catch (err) {
+      toast.push(err.message, 'error')
+    }
   }
 
   function place() {
@@ -49,18 +118,29 @@ export default function Checkout() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 md:py-12">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <Link
           to="/tickets"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-brand-600 transition"
         >
-          <ChevronLeft className="h-4 w-4" /> เลือกซื้อบัตรเพิ่ม
+          <ChevronLeft className="h-4 w-4" /> เลือกซื้อบัตรหรือสินค้าเพิ่ม
         </Link>
+
+        {quote.items.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setConfirmClearOpen(true)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/80 border border-red-200/60 px-3.5 py-1.5 rounded-xl transition shadow-xs"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span>เคลียร์ตะกร้า</span>
+          </button>
+        )}
       </div>
 
       <PageHeader
         title="สรุปรายการสั่งซื้อ (Checkout)"
-        subtitle="ตรวจสอบรายการบัตรและเสื้อที่ระลึกก่อนยืนยันเพื่อชำระเงิน"
+        subtitle="ตรวจสอบรายการบัตรและเสื้อที่ระลึก สามารถเพิ่มลดจำนวนหรือลบรายการก่อนยืนยัน"
         icon={ShoppingCart}
       />
 
@@ -87,24 +167,69 @@ export default function Checkout() {
             {/* Tickets Section */}
             {quote.ticketLines.length > 0 && (
               <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-2.5 font-bold text-slate-800 text-base mb-4 pb-3 border-b border-slate-100">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                    <Ticket className="h-4 w-4" />
+                <div className="flex items-center justify-between font-bold text-slate-800 text-base mb-4 pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                      <Ticket className="h-4 w-4" />
+                    </div>
+                    <span>รายการบัตรเข้างาน</span>
                   </div>
-                  <span>รายการบัตรเข้างาน</span>
+                  <span className="text-xs font-semibold text-slate-400">
+                    {quote.ticketLines.length} ประเภท
+                  </span>
                 </div>
+
                 <div className="divide-y divide-slate-100">
                   {quote.ticketLines.map((l) => (
-                    <div key={l.ticketTypeId} className="py-3 flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-slate-800 text-sm">{l.name}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">จำนวน: {l.quantity} ใบ</p>
-                        <p className="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                          <Coins className="h-3 w-3" /> โบนัส {formatToken(l.bonusTotal)} Token
-                        </p>
+                    <div key={l.ticketTypeId} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-slate-800 text-sm leading-snug">{l.name}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">ราคาใบละ {formatTHB(l.unitPrice)}</p>
+                        {l.bonusTotal > 0 && (
+                          <p className="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+                            <Coins className="h-3.5 w-3.5" /> โบนัส +{formatToken(l.bonusTotal)} Token
+                          </p>
+                        )}
                       </div>
-                      <div className="text-right">
-                        <span className="font-bold text-slate-900 text-sm">{formatTHB(l.lineTotal)}</span>
+
+                      {/* Quantity Adjuster & Total */}
+                      <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-50">
+                        <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateTicketQty(l.ticketTypeId, l.quantity - 1)}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 shadow-xs transition"
+                            title="ลดจำนวน"
+                          >
+                            <Minus className="h-3.5 w-3.5" />
+                          </button>
+                          <span className="w-8 text-center text-xs font-bold text-slate-800 select-none">
+                            {l.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateTicketQty(l.ticketTypeId, l.quantity + 1)}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 shadow-xs transition"
+                            title="เพิ่มจำนวน"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+
+                        <div className="text-right min-w-[75px]">
+                          <span className="font-extrabold text-slate-900 text-sm sm:text-base">
+                            {formatTHB(l.lineTotal)}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTicket(l.ticketTypeId)}
+                          className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
+                          title={`ลบ ${l.name}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -115,21 +240,69 @@ export default function Checkout() {
             {/* Merchandise Section */}
             {quote.merchLines.length > 0 && (
               <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-2.5 font-bold text-slate-800 text-base mb-4 pb-3 border-b border-slate-100">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-                    <Shirt className="h-4 w-4" />
+                <div className="flex items-center justify-between font-bold text-slate-800 text-base mb-4 pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+                      <Shirt className="h-4 w-4" />
+                    </div>
+                    <span>รายการเสื้อที่ระลึก</span>
                   </div>
-                  <span>รายการเสื้อที่ระลึก</span>
+                  <span className="text-xs font-semibold text-slate-400">
+                    {quote.merchLines.length} รายการ
+                  </span>
                 </div>
+
                 <div className="divide-y divide-slate-100">
                   {quote.merchLines.map((l) => (
-                    <div key={l.productId + l.size} className="py-3 flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-slate-800 text-sm">{l.name}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">ไซส์: {l.size} · จำนวน: {l.quantity} ตัว</p>
+                    <div key={l.productId + l.size} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-bold text-slate-800 text-sm leading-snug">{l.name}</p>
+                          <span className="rounded-md bg-purple-50 border border-purple-200/60 px-2 py-0.5 text-[11px] font-bold text-purple-700">
+                            ไซส์ {l.size}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-0.5">ราคาตัวละ {formatTHB(l.unitPrice)}</p>
                       </div>
-                      <div className="text-right">
-                        <span className="font-bold text-slate-900 text-sm">{formatTHB(l.lineTotal)}</span>
+
+                      {/* Quantity Adjuster & Total */}
+                      <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-50">
+                        <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateMerchQty(l.productId, l.size, l.quantity - 1)}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 shadow-xs transition"
+                            title="ลดจำนวน"
+                          >
+                            <Minus className="h-3.5 w-3.5" />
+                          </button>
+                          <span className="w-8 text-center text-xs font-bold text-slate-800 select-none">
+                            {l.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateMerchQty(l.productId, l.size, l.quantity + 1)}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 shadow-xs transition"
+                            title="เพิ่มจำนวน"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+
+                        <div className="text-right min-w-[75px]">
+                          <span className="font-extrabold text-slate-900 text-sm sm:text-base">
+                            {formatTHB(l.lineTotal)}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveMerch(l.productId, l.size)}
+                          className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
+                          title={`ลบ ${l.name} (${l.size})`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -208,10 +381,12 @@ export default function Checkout() {
                   <span>ยอดรวมเสื้อที่ระลึก</span>
                   <span className="font-semibold text-slate-800">{formatTHB(quote.subtotalMerchandise)}</span>
                 </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>ค่าจัดส่งพัสดุ</span>
-                  <span className="font-semibold text-slate-800">{formatTHB(quote.shippingFee)}</span>
-                </div>
+                {quote.merchLines.length > 0 && (
+                  <div className="flex justify-between text-slate-600">
+                    <span>ค่าจัดส่งพัสดุ</span>
+                    <span className="font-semibold text-slate-800">{formatTHB(quote.shippingFee)}</span>
+                  </div>
+                )}
 
                 <div className="pt-3 border-t border-slate-100">
                   <div className="flex items-baseline justify-between">
@@ -249,6 +424,17 @@ export default function Checkout() {
           </div>
         </div>
       )}
+
+      {/* Confirm Clear Cart Dialog */}
+      <ConfirmDialog
+        open={confirmClearOpen}
+        title="ยืนยันการเคลียร์ตะกร้าสินค้า"
+        message="คุณต้องการลบรายการสินค้าทั้งหมดออกจากตะกร้าใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้"
+        confirmLabel="เคลียร์ตะกร้าทั้งหมด"
+        danger
+        onConfirm={handleClearCart}
+        onClose={() => setConfirmClearOpen(false)}
+      />
     </div>
   )
 }

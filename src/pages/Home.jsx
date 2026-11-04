@@ -112,7 +112,7 @@ export default function Home() {
           {/* Background Banquet Hall Image */}
           <img
             src={heroBanquetImg}
-            alt="งานเลี้ยงรุ่น ศิษย์เก่า 2026"
+            alt="งานเลี้ยงรุ่นศิษย์เก่า 2026"
             className="absolute inset-0 h-full w-full object-cover object-right md:object-center select-none"
           />
 

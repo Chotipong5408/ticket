@@ -247,7 +247,7 @@ export default function AppLayout() {
               <Menu className="h-5 w-5" />
             </button>
             <span className="hidden sm:inline-block text-xs font-semibold text-slate-500">
-              งานเลี้ยงรุ่น ศิษย์เก่า 2026
+              งานเลี้ยงรุ่นศิษย์เก่า 2026
             </span>
           </div>
 

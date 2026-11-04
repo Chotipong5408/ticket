@@ -19,7 +19,7 @@ export default function PublicLayout() {
               <GraduationCap className="h-5 w-5" />
             </div>
             <span className="hidden sm:inline tracking-tight">
-              งานเลี้ยงรุ่น ศิษย์เก่า 2026
+              งานเลี้ยงรุ่นศิษย์เก่า 2026
             </span>
           </Link>
           <nav className="flex items-center gap-1 text-sm">

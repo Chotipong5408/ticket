@@ -57,6 +57,57 @@ export function updateCart(userId, cart) {
   return cartsRepo.save(userId, cart)
 }
 
+export function clearCart(userId) {
+  return cartsRepo.clear(userId)
+}
+
+export function removeTicketFromCart(userId, ticketTypeId) {
+  const cart = cartsRepo.get(userId)
+  cart.tickets = cart.tickets.filter((t) => t.ticketTypeId !== ticketTypeId)
+  return cartsRepo.save(userId, cart)
+}
+
+export function updateTicketQuantity(userId, ticketTypeId, quantity) {
+  const qty = Number(quantity)
+  if (!Number.isInteger(qty) || qty < 1) {
+    return removeTicketFromCart(userId, ticketTypeId)
+  }
+  if (qty > 20) throw new Error('จำกัดไม่เกิน 20 ใบต่อประเภท')
+  const cart = cartsRepo.get(userId)
+  const item = cart.tickets.find((t) => t.ticketTypeId === ticketTypeId)
+  if (item) {
+    item.quantity = qty
+    return cartsRepo.save(userId, cart)
+  }
+}
+
+export function removeMerchFromCart(userId, productId, size) {
+  const cart = cartsRepo.get(userId)
+  cart.merchandise = cart.merchandise.filter(
+    (m) => !(m.productId === productId && m.size === size)
+  )
+  return cartsRepo.save(userId, cart)
+}
+
+export function updateMerchQuantity(userId, productId, size, quantity) {
+  const qty = Number(quantity)
+  if (!Number.isInteger(qty) || qty < 1) {
+    return removeMerchFromCart(userId, productId, size)
+  }
+  const product = merchRepo.findById(productId)
+  if (product && product.stockEnabled && (product.stockBySize[size] || 0) < qty) {
+    throw new Error(`สต็อกไซส์ ${size} มีเหลือเพียง ${product.stockBySize[size] || 0} ชิ้น`)
+  }
+  const cart = cartsRepo.get(userId)
+  const item = cart.merchandise.find(
+    (m) => m.productId === productId && m.size === size
+  )
+  if (item) {
+    item.quantity = qty
+    return cartsRepo.save(userId, cart)
+  }
+}
+
 export function quoteCart(userId) {
   const cart = cartsRepo.get(userId)
   const settings = settingsRepo.get()
