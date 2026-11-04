@@ -10,6 +10,7 @@ import {
   ticketsRepo,
   merchOrdersRepo,
   settingsRepo,
+  usersRepo,
 } from '../repositories'
 import { logAction } from './auditService'
 
@@ -34,6 +35,24 @@ export function addTicketToCart(userId, ticketTypeId, quantity) {
   const i = cart.tickets.findIndex((t) => t.ticketTypeId === ticketTypeId)
   if (i >= 0) cart.tickets[i].quantity += qty
   else cart.tickets.push({ ticketTypeId, quantity: qty })
+  return cartsRepo.save(userId, cart)
+}
+
+/**
+ * Save attendee list for a ticket type into the cart.
+ * Each attendee: { fullName, faculty, major, enrollmentYearBE, email, phone, isOwner }
+ * This replaces (or sets) the attendees array for that ticketTypeId.
+ */
+export function setTicketAttendees(userId, ticketTypeId, attendees) {
+  const type = ticketTypesRepo.findById(ticketTypeId)
+  if (!type || !type.isActive) throw new Error('บัตรนี้ปิดขายแล้ว')
+  if (!Array.isArray(attendees) || attendees.length < 1) throw new Error('ต้องมีผู้ร่วมงานอย่างน้อย 1 คน')
+  if (attendees.length > 20) throw new Error('จำกัดไม่เกิน 20 ที่นั่งต่อประเภทบัตร')
+  const cart = cartsRepo.get(userId)
+  const i = cart.tickets.findIndex((t) => t.ticketTypeId === ticketTypeId)
+  const item = { ticketTypeId, quantity: attendees.length, attendees }
+  if (i >= 0) cart.tickets[i] = item
+  else cart.tickets.push(item)
   return cartsRepo.save(userId, cart)
 }
 
@@ -114,15 +133,20 @@ export function quoteCart(userId) {
   const ticketLines = cart.tickets.map((line) => {
     const type = ticketTypesRepo.findById(line.ticketTypeId)
     if (!type) throw new Error('ไม่พบประเภทบัตร')
+    // quantity is derived from attendees array when present
+    const qty = Array.isArray(line.attendees) && line.attendees.length > 0
+      ? line.attendees.length
+      : (line.quantity || 1)
     return {
       kind: 'ticket',
       ticketTypeId: type.id,
       name: type.name,
       unitPrice: type.price,
       bonusToken: type.bonusToken,
-      quantity: line.quantity,
-      lineTotal: type.price * line.quantity,
-      bonusTotal: type.bonusToken * line.quantity,
+      quantity: qty,
+      attendees: line.attendees || null,
+      lineTotal: type.price * qty,
+      bonusTotal: type.bonusToken * qty,
     }
   })
   const merchLines = cart.merchandise.map((line) => {
@@ -203,11 +227,62 @@ export function checkout(user) {
   }
   const tickets = []
   quote.ticketLines.forEach((line) => {
+    const attendees = line.attendees
     for (let i = 0; i < line.quantity; i += 1) {
+      let attendeeUserId = user.id
+      let attendeeName = user.fullName
+
+      // If attendee info is provided for this slot, resolve / create account
+      if (Array.isArray(attendees) && attendees[i]) {
+        const a = attendees[i]
+        if (a.isOwner) {
+          // Slot belongs to the buyer themselves
+          attendeeUserId = user.id
+          attendeeName = user.fullName
+        } else {
+          // Friend — find or create user account
+          let friendUser = usersRepo.findByEmail(a.email)
+          if (!friendUser) {
+            const now2 = nowIso()
+            friendUser = {
+              id: createId('usr'),
+              fullName: a.fullName,
+              enrollmentYearBE: Number(a.enrollmentYearBE),
+              faculty: a.faculty,
+              major: a.major,
+              email: a.email,
+              phone: a.phone,
+              // Auto-generated password: phone number (buyer told to share)
+              password: a.phone,
+              role: 'user',
+              storeId: null,
+              isActive: true,
+              tokenBalance: 0,
+              permissionGrants: [],
+              permissionRevokes: [],
+              createdAt: now2,
+              updatedAt: now2,
+            }
+            usersRepo.upsert(friendUser)
+            logAction({
+              actor: user,
+              action: 'register',
+              resourceType: 'user',
+              resourceId: friendUser.id,
+              after: { email: friendUser.email, createdByBuyer: user.id },
+            })
+          }
+          attendeeUserId = friendUser.id
+          attendeeName = friendUser.fullName
+        }
+      }
+
       tickets.push({
         id: createId('tic'),
         orderId,
         buyerId: user.id,
+        attendeeId: attendeeUserId,
+        attendeeName,
         ticketTypeId: line.ticketTypeId,
         name: line.name,
         price: line.unitPrice,

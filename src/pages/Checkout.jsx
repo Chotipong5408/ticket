@@ -9,7 +9,6 @@ import {
   updateCart,
   checkout,
   clearCart,
-  updateTicketQuantity,
   removeTicketFromCart,
   updateMerchQuantity,
   removeMerchFromCart,
@@ -51,18 +50,6 @@ export default function Checkout() {
     const next = { ...ship, [e.target.name]: e.target.value }
     setShip(next)
     updateCart(user.id, { ...quote.cart, shipping: next })
-  }
-
-  const handleUpdateTicketQty = (ticketTypeId, nextQty) => {
-    if (nextQty <= 0) {
-      handleRemoveTicket(ticketTypeId)
-      return
-    }
-    try {
-      updateTicketQuantity(user.id, ticketTypeId, nextQty)
-    } catch (err) {
-      toast.push(err.message, 'error')
-    }
   }
 
   const handleRemoveTicket = (ticketTypeId) => {
@@ -181,41 +168,34 @@ export default function Checkout() {
 
                 <div className="divide-y divide-slate-100">
                   {quote.ticketLines.map((l) => (
-                    <div key={l.ticketTypeId} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div key={l.ticketTypeId} className="py-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-slate-800 text-sm leading-snug">{l.name}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">ราคาใบละ {formatTHB(l.unitPrice)}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">ราคาใบละ {formatTHB(l.unitPrice)} · {l.quantity} ที่นั่ง</p>
                         {l.bonusTotal > 0 && (
                           <p className="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
                             <Coins className="h-3.5 w-3.5" /> โบนัส +{formatToken(l.bonusTotal)} Token
                           </p>
                         )}
+                        {/* Attendee list */}
+                        {Array.isArray(l.attendees) && l.attendees.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {l.attendees.map((a, i) => (
+                              <div key={i} className="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                <span className={`inline-flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${a.isOwner ? 'bg-brand-100 text-brand-700' : 'bg-slate-100 text-slate-600'}`}>
+                                  {i + 1}
+                                </span>
+                                <span className="font-medium text-slate-700">{a.fullName}</span>
+                                <span className="text-slate-400">({a.email})</span>
+                                {!a.isOwner && <span className="rounded bg-amber-50 border border-amber-200 px-1 text-amber-700">เพื่อน</span>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
-                      {/* Quantity Adjuster & Total */}
+                      {/* Total & Remove */}
                       <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-50">
-                        <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateTicketQty(l.ticketTypeId, l.quantity - 1)}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 shadow-xs transition"
-                            title="ลดจำนวน"
-                          >
-                            <Minus className="h-3.5 w-3.5" />
-                          </button>
-                          <span className="w-8 text-center text-xs font-bold text-slate-800 select-none">
-                            {l.quantity}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateTicketQty(l.ticketTypeId, l.quantity + 1)}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 shadow-xs transition"
-                            title="เพิ่มจำนวน"
-                          >
-                            <Plus className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-
                         <div className="text-right min-w-[75px]">
                           <span className="font-extrabold text-slate-900 text-sm sm:text-base">
                             {formatTHB(l.lineTotal)}

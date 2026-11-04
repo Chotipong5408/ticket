@@ -2,11 +2,54 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { listActiveTicketTypes } from '../services/catalogService'
-import { addTicketToCart, quoteCart } from '../services/orderService'
+import { setTicketAttendees, quoteCart, removeTicketFromCart } from '../services/orderService'
+import { usersRepo } from '../repositories'
 import { useLiveData } from '../hooks/useLiveData'
 import { formatTHB, formatToken } from '../lib/money'
-import { Ticket, ShoppingCart, Coins, Sparkles, Check, AlertCircle, ArrowRight, Plus, Minus, Shirt } from 'lucide-react'
+import {
+  Ticket,
+  ShoppingCart,
+  Coins,
+  AlertCircle,
+  ArrowRight,
+  Minus,
+  Shirt,
+  UserPlus,
+  Users,
+  Trash2,
+  ChevronUp,
+  CheckCircle2,
+  Key,
+} from 'lucide-react'
 import { useState } from 'react'
+
+/** Empty attendee form template */
+const emptyAttendee = () => ({
+  fullName: '',
+  faculty: '',
+  major: '',
+  enrollmentYearBE: '',
+  email: '',
+  phone: '',
+  isOwner: false,
+})
+
+/** Validate a single attendee row; returns error string or null */
+function validateAttendee(a, currentUserEmail) {
+  if (!a.fullName.trim() || a.fullName.trim().length < 2) return 'กรุณากรอกชื่อ-นามสกุล'
+  if (!a.faculty.trim() || a.faculty.trim().length < 2) return 'กรุณากรอกคณะ'
+  if (!a.major.trim() || a.major.trim().length < 2) return 'กรุณากรอกสาขา'
+  const year = Number(a.enrollmentYearBE)
+  if (!year || year < 2400 || year > 2600) return 'กรุณากรอก พ.ศ. ที่เข้าเรียน (เช่น 2560)'
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)) return 'รูปแบบอีเมลไม่ถูกต้อง'
+  if (!/^0\d{8,9}$/.test(a.phone)) return 'เบอร์โทรศัพท์ไม่ถูกต้อง (เช่น 0812345678)'
+  // Warn if email already exists AND it's not the buyer
+  if (!a.isOwner && a.email.trim().toLowerCase() !== (currentUserEmail || '').toLowerCase()) {
+    const existing = usersRepo.findByEmail(a.email.trim())
+    if (existing) return `อีเมล ${a.email} มีบัญชีในระบบแล้ว (จะใช้ข้อมูลบัญชีเดิม)`
+  }
+  return null
+}
 
 export default function Tickets() {
   const { user } = useAuth()
@@ -14,30 +57,125 @@ export default function Tickets() {
   const nav = useNavigate()
   useLiveData()
   const types = listActiveTicketTypes()
-  const [quantities, setQuantities] = useState({})
+
+  /**
+   * attendeesByType: { [ticketTypeId]: [ { fullName, faculty, major, enrollmentYearBE, email, phone, isOwner } ] }
+   * openPanels: Set of ticketTypeId strings that are expanded
+   */
+  const [attendeesByType, setAttendeesByType] = useState({})
+  const [openPanels, setOpenPanels] = useState(new Set())
+  const [savedTypes, setSavedTypes] = useState(new Set()) // types already added to cart
 
   const cartCount = user ? quoteCart(user.id).items.length : 0
 
-  const setQty = (id, val) => {
-    const num = Math.max(1, Math.min(20, Number(val) || 1))
-    setQuantities({ ...quantities, [id]: num })
+  /** Toggle a type's panel open/closed, initialising with 1 owner slot on first open */
+  const togglePanel = (typeId) => {
+    if (!user) { nav('/login'); return }
+    setOpenPanels((prev) => {
+      const next = new Set(prev)
+      if (next.has(typeId)) {
+        next.delete(typeId)
+      } else {
+        next.add(typeId)
+        // Initialise with buyer's slot if not yet set
+        if (!attendeesByType[typeId]) {
+          setAttendeesByType((a) => ({
+            ...a,
+            [typeId]: [
+              {
+                fullName: user.fullName || '',
+                faculty: user.faculty || '',
+                major: user.major || '',
+                enrollmentYearBE: user.enrollmentYearBE ? String(user.enrollmentYearBE) : '',
+                email: user.email || '',
+                phone: user.phone || '',
+                isOwner: true,
+              },
+            ],
+          }))
+        }
+      }
+      return next
+    })
   }
 
-  const incQty = (id) => {
-    const current = quantities[id] || 1
-    setQty(id, current + 1)
+  /** Update a single field in a specific attendee slot */
+  const updateField = (typeId, idx, field, value) => {
+    setAttendeesByType((prev) => {
+      const list = [...(prev[typeId] || [])]
+      list[idx] = { ...list[idx], [field]: value }
+      return { ...prev, [typeId]: list }
+    })
+    // Mark as not saved when edited
+    setSavedTypes((prev) => { const n = new Set(prev); n.delete(typeId); return n })
   }
 
-  const decQty = (id) => {
-    const current = quantities[id] || 1
-    setQty(id, Math.max(1, current - 1))
+  /** Add a new blank friend slot */
+  const addSlot = (typeId) => {
+    setAttendeesByType((prev) => {
+      const list = prev[typeId] || []
+      if (list.length >= 20) { toast.push('จำกัดไม่เกิน 20 ที่นั่งต่อประเภทบัตร', 'error'); return prev }
+      return { ...prev, [typeId]: [...list, emptyAttendee()] }
+    })
+    setSavedTypes((prev) => { const n = new Set(prev); n.delete(typeId); return n })
   }
 
-  const handleAdd = (type) => {
-    if (!user) return nav('/login')
+  /** Remove an attendee slot (can't remove the first/owner slot) */
+  const removeSlot = (typeId, idx) => {
+    setAttendeesByType((prev) => {
+      const list = [...(prev[typeId] || [])]
+      list.splice(idx, 1)
+      return { ...prev, [typeId]: list }
+    })
+    setSavedTypes((prev) => { const n = new Set(prev); n.delete(typeId); return n })
+  }
+
+  /** Save attendees to cart */
+  const handleSave = (type) => {
+    if (!user) { nav('/login'); return }
+    const list = attendeesByType[type.id] || []
+    if (list.length === 0) { toast.push('กรุณาเพิ่มผู้เข้าร่วมงานอย่างน้อย 1 คน', 'error'); return }
+
+    // Validate each row
+    const errors = []
+    const emails = []
+    list.forEach((a, i) => {
+      const label = i === 0 ? 'คุณ' : `เพื่อนคนที่ ${i}`
+      const err = validateAttendee(a, user.email)
+      // Allow "already exists" warning but don't block
+      if (err && !err.includes('มีบัญชีในระบบแล้ว')) {
+        errors.push(`${label}: ${err}`)
+      }
+      emails.push(a.email.toLowerCase())
+    })
+
+    // Check for duplicate emails within the list
+    const dupEmails = emails.filter((e, i) => emails.indexOf(e) !== i)
+    if (dupEmails.length > 0) {
+      errors.push(`มีอีเมลซ้ำกันในรายการ: ${[...new Set(dupEmails)].join(', ')}`)
+    }
+
+    if (errors.length > 0) {
+      toast.push(errors[0], 'error')
+      return
+    }
+
     try {
-      addTicketToCart(user.id, type.id, quantities[type.id] || 1)
-      toast.push(`เพิ่ม ${type.name} (${quantities[type.id] || 1} ใบ) ลงตะกร้าแล้ว`, 'success')
+      setTicketAttendees(user.id, type.id, list)
+      setSavedTypes((prev) => new Set([...prev, type.id]))
+      toast.push(`เพิ่ม ${type.name} (${list.length} ที่นั่ง) ลงตะกร้าแล้ว`, 'success')
+    } catch (err) {
+      toast.push(err.message, 'error')
+    }
+  }
+
+  /** Remove a ticket type from cart */
+  const handleRemove = (typeId) => {
+    if (!user) return
+    try {
+      removeTicketFromCart(user.id, typeId)
+      setSavedTypes((prev) => { const n = new Set(prev); n.delete(typeId); return n })
+      toast.push('ลบรายการออกจากตะกร้าแล้ว', 'success')
     } catch (err) {
       toast.push(err.message, 'error')
     }
@@ -54,6 +192,10 @@ export default function Tickets() {
         <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">เลือกประเภทบัตรเข้างาน</h1>
         <p className="text-sm text-slate-500 mt-2 leading-relaxed">
           บัตรทุกประเภทจะได้รับ QR Ticket หลังการตรวจสอบชำระเงิน และรับ Token โบนัสเข้ากระเป๋าสำหรับใช้จ่ายภายในงานทันที
+        </p>
+        <p className="text-xs text-brand-600 font-semibold mt-1">
+          <Users className="inline h-3.5 w-3.5 mr-1" />
+          สามารถซื้อบัตรให้เพื่อนได้ — กรอกข้อมูลเพื่อนแต่ละคนในแบบฟอร์มด้านล่าง
         </p>
 
         {/* Dual Switcher: Tickets <-> Shirts */}
@@ -84,17 +226,19 @@ export default function Tickets() {
         </div>
       )}
 
-      {/* Ticket Cards Grid */}
-      <div className="grid md:grid-cols-3 gap-6">
+      {/* Ticket Cards */}
+      <div className="space-y-6">
         {types.map((type, idx) => {
-          const qty = quantities[type.id] || 1
           const remaining = type.stockLimit ? type.stockLimit - (type.soldCount || 0) : null
-          const isFeatured = idx === 0 // highlight first ticket
+          const isFeatured = idx === 0
+          const isOpen = openPanels.has(type.id)
+          const isSaved = savedTypes.has(type.id)
+          const list = attendeesByType[type.id] || []
 
           return (
             <div
               key={type.id}
-              className={`relative rounded-3xl bg-white border transition-all duration-300 flex flex-col justify-between overflow-hidden ${
+              className={`relative rounded-3xl bg-white border transition-all duration-300 overflow-hidden ${
                 isFeatured
                   ? 'border-brand-500 ring-4 ring-brand-500/10 shadow-xl'
                   : 'border-slate-200/80 hover:border-brand-300 shadow-sm hover:shadow-lg'
@@ -106,91 +250,147 @@ export default function Tickets() {
                 </div>
               )}
 
-              <div className="p-6 flex-1">
-                {/* Header info */}
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 border border-brand-200/60 text-brand-600 shrink-0">
-                    <Ticket className="h-5 w-5" />
+              {/* Card Summary Row */}
+              <div className="p-6 flex flex-col sm:flex-row sm:items-center gap-5">
+                {/* Icon */}
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border ${isFeatured ? 'bg-brand-50 border-brand-200/60 text-brand-600' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
+                  <Ticket className="h-6 w-6" />
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                    <h2 className="text-base font-bold text-slate-800">{type.name}</h2>
+                    {remaining !== null && (
+                      <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${
+                        remaining <= 10
+                          ? 'bg-red-50 text-red-700 border-red-200'
+                          : 'bg-slate-100 text-slate-600 border-slate-200'
+                      }`}>
+                        เหลือ {remaining} ใบ
+                      </span>
+                    )}
+                    {isSaved && (
+                      <span className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> อยู่ในตะกร้า ({list.length} ที่นั่ง)
+                      </span>
+                    )}
                   </div>
-                  {remaining !== null && (
-                    <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${
-                      remaining <= 10
-                        ? 'bg-red-50 text-red-700 border-red-200'
-                        : 'bg-slate-100 text-slate-600 border-slate-200'
-                    }`}>
-                      เหลือ {remaining} ใบ
-                    </span>
+                  <p className="text-xs text-slate-500 leading-relaxed">{type.description}</p>
+                </div>
+
+                {/* Price + Action */}
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  <div className="text-right">
+                    <div className="text-2xl font-extrabold text-slate-900">{formatTHB(type.price)}</div>
+                    <div className="text-[11px] text-slate-400">/ ท่าน</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isSaved && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemove(type.id)}
+                        className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition"
+                        title="ลบออกจากตะกร้า"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => togglePanel(type.id)}
+                      className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition shadow-sm ${
+                        isOpen
+                          ? 'bg-slate-100 text-slate-700 border border-slate-200'
+                          : isFeatured
+                            ? 'bg-brand-600 hover:bg-brand-700 text-white'
+                            : 'bg-slate-900 hover:bg-slate-800 text-white'
+                      }`}
+                    >
+                      {isOpen ? (
+                        <><ChevronUp className="h-3.5 w-3.5" /> ซ่อน</>
+                      ) : (
+                        <><ShoppingCart className="h-3.5 w-3.5" /> {isSaved ? 'แก้ไข' : 'เลือกซื้อ'}</>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bonus Token bar */}
+              <div className="px-6 pb-4 -mt-2">
+                <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 rounded-xl px-2.5 py-1.5">
+                  <Coins className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                  <span>รับโบนัสฟรี {formatToken(type.bonusToken)} Token / ที่นั่ง</span>
+                </div>
+              </div>
+
+              {/* Expandable Attendee Panel */}
+              {isOpen && (
+                <div className="border-t border-slate-100 bg-slate-50/60 px-6 py-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-brand-600" />
+                      <span className="text-sm font-bold text-slate-800">รายชื่อผู้เข้าร่วมงาน</span>
+                      <span className="rounded-full bg-brand-100 text-brand-700 px-2 py-0.5 text-[11px] font-bold">
+                        {list.length} ที่นั่ง
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => addSlot(type.id)}
+                      disabled={list.length >= 20}
+                      className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 hover:border-brand-400 hover:text-brand-600 text-slate-600 text-xs font-semibold px-3.5 py-2 transition shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <UserPlus className="h-3.5 w-3.5" /> เพิ่มเพื่อน
+                    </button>
+                  </div>
+
+                  <div className="space-y-5">
+                    {list.map((a, i) => (
+                      <AttendeeForm
+                        key={i}
+                        index={i}
+                        attendee={a}
+                        isOwnerSlot={i === 0}
+                        onChange={(field, val) => updateField(type.id, i, field, val)}
+                        onRemove={i > 0 ? () => removeSlot(type.id, i) : null}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Info box about auto password */}
+                  {list.some((a) => !a.isOwner) && (
+                    <div className="mt-4 rounded-2xl bg-amber-50 border border-amber-200/80 p-4 flex items-start gap-3">
+                      <Key className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
+                      <div className="text-xs text-amber-900 leading-relaxed">
+                        <strong className="block font-semibold mb-0.5">รหัสผ่านบัญชีของเพื่อน</strong>
+                        ระบบจะสร้างบัญชีผู้ใช้ให้เพื่อนอัตโนมัติ โดยใช้ <strong>เบอร์โทรศัพท์เป็นรหัสผ่านเริ่มต้น</strong> กรุณาแจ้งเพื่อนให้เข้าสู่ระบบและเปลี่ยนรหัสผ่านใหม่ภายหลัง
+                      </div>
+                    </div>
                   )}
+
+                  {/* Save to cart button */}
+                  <button
+                    type="button"
+                    onClick={() => handleSave(type)}
+                    className={`mt-5 w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${
+                      isFeatured
+                        ? 'bg-brand-600 hover:bg-brand-700 text-white shadow-brand-500/20'
+                        : 'bg-slate-900 hover:bg-slate-800 text-white'
+                    }`}
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    {isSaved ? 'บันทึกการเปลี่ยนแปลง' : `เพิ่มลงตะกร้า (${list.length} ที่นั่ง · ${formatTHB(type.price * list.length)})`}
+                  </button>
                 </div>
-
-                <h2 className="text-lg font-bold text-slate-800 mb-1.5">{type.name}</h2>
-                <p className="text-xs text-slate-500 mb-6 leading-relaxed min-h-[36px]">{type.description}</p>
-
-                {/* Price Display */}
-                <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 mb-4">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-slate-900">{formatTHB(type.price)}</span>
-                    <span className="text-xs text-slate-400 font-medium">/ ท่าน</span>
-                  </div>
-
-                  {/* Bonus Token Pill */}
-                  <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 rounded-xl px-2.5 py-1.5">
-                    <Coins className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <span>รับโบนัสฟรี {formatToken(type.bonusToken)} Token</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Section */}
-              <div className="p-6 pt-0 border-t border-slate-100 bg-slate-50/40">
-                <div className="flex items-center justify-between gap-3 my-4">
-                  <span className="text-xs font-medium text-slate-600">จำนวนที่ต้องการ:</span>
-                  <div className="flex items-center rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => decQty(type.id)}
-                      className="p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition"
-                      aria-label="ลดจำนวน"
-                    >
-                      <Minus className="h-3.5 w-3.5" />
-                    </button>
-                    <input
-                      type="number"
-                      min="1"
-                      max="20"
-                      value={qty}
-                      onChange={(e) => setQty(type.id, e.target.value)}
-                      className="w-12 text-center text-sm font-bold text-slate-800 border-0 focus:ring-0 p-0"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => incQty(type.id)}
-                      className="p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition"
-                      aria-label="เพิ่มจำนวน"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleAdd(type)}
-                  className={`w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm ${
-                    isFeatured
-                      ? 'bg-brand-600 hover:bg-brand-700 text-white shadow-brand-500/20'
-                      : 'bg-slate-900 hover:bg-slate-800 text-white'
-                  }`}
-                >
-                  <ShoppingCart className="h-4 w-4" /> เพิ่มลงตะกร้า
-                </button>
-              </div>
+              )}
             </div>
           )
         })}
       </div>
 
-      {/* Floating or fixed Checkout Banner */}
+      {/* Floating Checkout Banner */}
       {user && cartCount > 0 && (
         <div className="mt-10 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 p-5 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
           <div className="flex items-center gap-3">
@@ -217,10 +417,96 @@ export default function Tickets() {
         <div className="space-y-1">
           <strong className="block font-semibold">ข้อกำหนดและเงื่อนไขการซื้อบัตร:</strong>
           <p>
-            บัตรที่ซื้อแล้วไม่สามารถยกเลิก ขอคืนเงิน หรือแลกเปลี่ยนเป็นเงินสดได้ในทุกกรณี หากท่านซื้อบัตรให้เพื่อนหรือคนสนิท ท่านสามารถบันทึกภาพ QR Ticket หลังจากได้รับการอนุมัติแล้วส่งต่อให้เพื่อนเพื่อใช้สแกนเข้างานด้วยตนเอง
+            บัตรที่ซื้อแล้วไม่สามารถยกเลิก ขอคืนเงิน หรือแลกเปลี่ยนเป็นเงินสดได้ในทุกกรณี หากท่านซื้อบัตรให้เพื่อน ระบบจะสร้างบัญชีผู้ใช้ให้เพื่อนโดยอัตโนมัติ และ QR Ticket จะถูกเชื่อมโยงกับบัญชีของเพื่อนแต่ละคน
           </p>
         </div>
       </div>
+    </div>
+  )
+}
+
+/** Sub-component: form for a single attendee slot */
+function AttendeeForm({ index, attendee, isOwnerSlot, onChange, onRemove }) {
+  return (
+    <div className={`rounded-2xl border p-4 bg-white shadow-xs ${isOwnerSlot ? 'border-brand-200' : 'border-slate-200'}`}>
+      {/* Slot header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-extrabold ${isOwnerSlot ? 'bg-brand-100 text-brand-700' : 'bg-slate-100 text-slate-600'}`}>
+            {index + 1}
+          </div>
+          <span className="text-xs font-bold text-slate-700">
+            {isOwnerSlot ? '👤 คุณ (ผู้ซื้อ)' : `🫂 เพื่อนคนที่ ${index}`}
+          </span>
+        </div>
+        {onRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="flex h-7 w-7 items-center justify-center rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
+            title="ลบผู้ร่วมงานคนนี้"
+          >
+            <Minus className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
+      {/* Fields */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div className="sm:col-span-2">
+          <input
+            className="input text-xs w-full"
+            placeholder="ชื่อ-นามสกุล *"
+            value={attendee.fullName}
+            onChange={(e) => onChange('fullName', e.target.value)}
+            readOnly={isOwnerSlot}
+          />
+        </div>
+        <input
+          className="input text-xs"
+          placeholder="คณะ *"
+          value={attendee.faculty}
+          onChange={(e) => onChange('faculty', e.target.value)}
+          readOnly={isOwnerSlot}
+        />
+        <input
+          className="input text-xs"
+          placeholder="สาขา *"
+          value={attendee.major}
+          onChange={(e) => onChange('major', e.target.value)}
+          readOnly={isOwnerSlot}
+        />
+        <input
+          className="input text-xs"
+          placeholder="ปี พ.ศ. ที่เข้าเรียน (เช่น 2560) *"
+          value={attendee.enrollmentYearBE}
+          onChange={(e) => onChange('enrollmentYearBE', e.target.value)}
+          type="number"
+          min="2400"
+          max="2600"
+          readOnly={isOwnerSlot}
+        />
+        <input
+          className="input text-xs"
+          placeholder="เบอร์โทรศัพท์ * (ใช้เป็นรหัสผ่านเริ่มต้น)"
+          value={attendee.phone}
+          onChange={(e) => onChange('phone', e.target.value)}
+          readOnly={isOwnerSlot}
+        />
+        <div className="sm:col-span-2">
+          <input
+            className="input text-xs w-full"
+            placeholder="อีเมล *"
+            type="email"
+            value={attendee.email}
+            onChange={(e) => onChange('email', e.target.value)}
+            readOnly={isOwnerSlot}
+          />
+        </div>
+      </div>
+      {isOwnerSlot && (
+        <p className="text-[11px] text-slate-400 mt-2">ข้อมูลของคุณดึงจากโปรไฟล์บัญชี (ไม่สามารถแก้ไขได้ที่นี่)</p>
+      )}
     </div>
   )
 }
