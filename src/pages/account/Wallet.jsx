@@ -57,9 +57,7 @@ export default function AccountWallet() {
               <span className="text-4xl sm:text-5xl font-black tracking-tight">
                 {formatToken(w.balance)}
               </span>
-              <span className="text-xl sm:text-2xl font-bold text-brand-300">
-                TOKEN
-              </span>
+              <span className="text-xl sm:text-2xl font-bold text-brand-300"></span>
             </div>
 
             {/* Rate & Estimated Value Badges */}
