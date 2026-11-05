@@ -6,7 +6,6 @@ import { useLiveData } from "../../hooks/useLiveData";
 import {
   Coins,
   CircleDollarSign,
-  ScanLine,
   History,
   ArrowRight,
   Ticket,
@@ -61,12 +60,6 @@ export default function TokenDashboard() {
               className="inline-flex items-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-bold px-4 py-2.5 shadow transition"
             >
               <CircleDollarSign className="h-4 w-4" /> เติมเงินให้ผู้ใช้
-            </Link>
-            <Link
-              to="/token-admin/scan"
-              className="inline-flex items-center gap-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold px-4 py-2.5 border border-white/20 backdrop-blur-sm transition"
-            >
-              <ScanLine className="h-4 w-4" /> สแกน Token
             </Link>
           </div>
         </div>

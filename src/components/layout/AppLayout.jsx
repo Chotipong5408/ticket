@@ -65,7 +65,6 @@ const NAV = {
     { label: "ตรวจบัตรเข้างาน (Check-in)", to: "/admin/checkin", icon: Ticket },
     { label: "เติม Token", to: "/token-admin/topup", icon: CircleDollarSign },
     { label: "ประวัติธุรกรรม", to: "/token-admin/transactions", icon: History },
-    { label: "สแกน QR ผู้ใช้", to: "/token-admin/scan", icon: ScanLine },
   ],
   store_admin: [
     { label: "Dashboard", to: "/store/dashboard", icon: LayoutDashboard },

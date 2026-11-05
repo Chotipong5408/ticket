@@ -45,7 +45,6 @@ import AdminSettings from "./pages/admin/Settings";
 import TokenDashboard from "./pages/token/Dashboard";
 import TokenTopup from "./pages/token/Topup";
 import TokenTransactions from "./pages/token/Transactions";
-import TokenScan from "./pages/token/Scan";
 
 /* Store Admin pages */
 import StoreDashboard from "./pages/store/Dashboard";
@@ -246,11 +245,7 @@ export default function App() {
         />
         <Route
           path="/token-admin/scan"
-          element={
-            <RequireRole roles={["super_admin", "token_admin"]}>
-              <TokenScan />
-            </RequireRole>
-          }
+          element={<Navigate to="/token-admin/topup" replace />}
         />
 
         {/* Store Admin */}
