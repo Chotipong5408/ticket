@@ -5,7 +5,7 @@ import { saveSettings } from "../../services/catalogService";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { useLiveData } from "../../hooks/useLiveData";
-import { Coins, Save } from "lucide-react";
+import { Coins, Save, Plus, Minus } from "lucide-react";
 
 export default function TokenSettings() {
   useLiveData();
@@ -55,21 +55,48 @@ export default function TokenSettings() {
           <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1.5">
             อัตราแลกเปลี่ยนพื้นฐาน (บาท / 1 Token)
           </label>
-          <div className="relative max-w-xs">
-            <input
-              className="input pr-12 font-bold text-slate-800"
-              type="number"
-              min="1"
-              max="999999999"
-              value={price}
-              onChange={handlePriceChange}
-              onInput={(e) => {
-                if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+          <div className="flex items-center gap-2 max-w-xs">
+            <button
+              type="button"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-300 active:scale-95 transition disabled:opacity-40"
+              onClick={() => {
+                const current = Number(price) || 1;
+                setPrice(String(Math.max(1, current - 1)));
               }}
-            />
-            <span className="absolute right-3 top-2.5 text-xs font-semibold text-slate-400">
-              บาท
-            </span>
+              disabled={Number(price) <= 1}
+              title="ลด 1 บาท"
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+
+            <div className="relative flex-1">
+              <input
+                className="input pr-12 text-center font-bold text-slate-800"
+                type="number"
+                min="1"
+                max="999999999"
+                value={price}
+                onChange={handlePriceChange}
+                onInput={(e) => {
+                  if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                }}
+              />
+              <span className="absolute right-3 top-2.5 text-xs font-semibold text-slate-400 pointer-events-none select-none">
+                บาท
+              </span>
+            </div>
+
+            <button
+              type="button"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-300 active:scale-95 transition"
+              onClick={() => {
+                const current = Number(price) || 0;
+                setPrice(String(Math.min(999999999, current + 1)));
+              }}
+              title="เพิ่ม 1 บาท"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
           </div>
           <p className="text-[11px] text-slate-400 mt-1.5">
             เรทหลักของระบบ: <strong>1 Token = {currentRate} บาท</strong> (ใช้คำนวณยอดเงินเทียบเท่าและจุดบริการเติมเงิน)

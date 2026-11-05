@@ -16,6 +16,8 @@ import {
   CheckCircle2,
   ScanLine,
   UserCheck,
+  Plus,
+  Minus,
 } from "lucide-react";
 
 export default function TokenTopup() {
@@ -193,48 +195,116 @@ export default function TokenTopup() {
               {/* Amount Form */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1.5">
                     จำนวน Token ที่เติม
                   </label>
-                  <input
-                    className="input text-xs font-bold"
-                    type="number"
-                    min="1"
-                    max="999999999"
-                    value={tokens}
-                    onInput={(e) => {
-                      if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
-                    }}
-                    onChange={(e) => {
-                      const v = e.target.value.slice(0, 9);
-                      setTokens(v);
-                      setCash(v === '' ? '' : Number(v) * settings.tokenPriceTHB);
-                    }}
-                  />
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-300 active:scale-95 transition disabled:opacity-40"
+                      onClick={() => {
+                        const cur = Number(tokens) || 1;
+                        const next = Math.max(1, cur - 1);
+                        setTokens(String(next));
+                        setCash(next * (settings.tokenPriceTHB || 10));
+                      }}
+                      disabled={Number(tokens) <= 1}
+                      title="ลด 1 Token"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <div className="relative flex-1">
+                      <input
+                        className="input pr-14 text-center text-xs font-bold"
+                        type="number"
+                        min="1"
+                        max="999999999"
+                        value={tokens}
+                        onInput={(e) => {
+                          if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                        }}
+                        onChange={(e) => {
+                          const v = e.target.value.slice(0, 9);
+                          setTokens(v);
+                          setCash(v === '' ? '' : Number(v) * (settings.tokenPriceTHB || 10));
+                        }}
+                      />
+                      <span className="absolute right-3 top-2.5 text-[11px] font-semibold text-slate-400 pointer-events-none select-none">
+                        Token
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-300 active:scale-95 transition"
+                      onClick={() => {
+                        const cur = Number(tokens) || 0;
+                        const next = Math.min(999999999, cur + 1);
+                        setTokens(String(next));
+                        setCash(next * (settings.tokenPriceTHB || 10));
+                      }}
+                      title="เพิ่ม 1 Token"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1.5">
                     ยอดเงินสดที่ต้องเรียกเก็บ
                   </label>
-                  <div className="relative">
-                    <input
-                      className="input pr-12 text-xs font-bold text-emerald-700"
-                      type="number"
-                      min="0"
-                      max="999999999"
-                      value={cash}
-                      onInput={(e) => {
-                        if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-300 active:scale-95 transition disabled:opacity-40"
+                      onClick={() => {
+                        const rate = settings.tokenPriceTHB || 10;
+                        const cur = Number(cash) || 0;
+                        const next = Math.max(0, cur - rate);
+                        setCash(next);
+                        setTokens(String(Math.floor(next / rate)));
                       }}
-                      onChange={(e) => {
-                        const v = e.target.value.slice(0, 9);
-                        setCash(v === '' ? '' : Number(v));
+                      disabled={Number(cash) <= 0}
+                      title={`ลด ${settings.tokenPriceTHB || 10} บาท`}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <div className="relative flex-1">
+                      <input
+                        className="input pr-12 text-center text-xs font-bold text-emerald-700"
+                        type="number"
+                        min="0"
+                        max="999999999"
+                        value={cash}
+                        onInput={(e) => {
+                          if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                        }}
+                        onChange={(e) => {
+                          const v = e.target.value.slice(0, 9);
+                          setCash(v === '' ? '' : Number(v));
+                          if (v !== '' && Number(v) >= 0) {
+                            setTokens(String(Math.floor(Number(v) / (settings.tokenPriceTHB || 10))));
+                          }
+                        }}
+                      />
+                      <span className="absolute right-3 top-2.5 text-xs font-semibold text-slate-400 pointer-events-none select-none">
+                        บาท
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-300 active:scale-95 transition"
+                      onClick={() => {
+                        const rate = settings.tokenPriceTHB || 10;
+                        const cur = Number(cash) || 0;
+                        const next = Math.min(999999999, cur + rate);
+                        setCash(next);
+                        setTokens(String(Math.floor(next / rate)));
                       }}
-                    />
-                    <span className="absolute right-3 top-2.5 text-xs font-semibold text-slate-400">
-                      บาท
-                    </span>
+                      title={`เพิ่ม ${settings.tokenPriceTHB || 10} บาท`}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
               </div>
