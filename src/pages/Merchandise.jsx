@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { PageHeader } from "../components/ui/PageHeader";
 import { ShirtArt } from "../components/ShirtArt";
 import { merchRepo } from "../repositories";
@@ -34,7 +34,8 @@ export default function Merchandise() {
   const [size, setSize] = useState({});
   const [qty, setQty] = useState({});
 
-  const cartCount = user ? quoteCart(user.id).items.length : 0;
+  const cart = user ? quoteCart(user.id) : null;
+  const cartCount = cart ? cart.items.length : 0;
 
   function add(p) {
     if (!user) return nav("/login");
@@ -62,41 +63,67 @@ export default function Merchandise() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 md:py-12">
+    <div className="mx-auto max-w-5xl px-4 py-6 md:py-10 space-y-8 animate-fade-in">
+      {/* ─── Top Flow Stepper & Cart Bar ─── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl bg-white border border-slate-200/90 p-3 sm:p-4 shadow-xs">
+        {/* Step Progress Indicators */}
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-bold overflow-x-auto pb-1 sm:pb-0">
+          <Link
+            to="/tickets"
+            className="inline-flex items-center gap-2 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 px-3.5 py-2 text-slate-600 hover:text-slate-900 transition shrink-0"
+          >
+            <Ticket className="h-3.5 w-3.5 text-slate-400" />
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[11px] font-bold text-slate-600">
+              1
+            </span>
+            <span>เลือกบัตรเข้างาน</span>
+          </Link>
+
+          <span className="text-slate-300 font-bold px-1">→</span>
+
+          <div className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-4 py-2 text-white shadow-sm shadow-brand-500/20 shrink-0">
+            <Shirt className="h-3.5 w-3.5 text-white" />
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[11px] font-black text-brand-700">
+              2
+            </span>
+            <span>เสื้อที่ระลึก</span>
+          </div>
+
+          <span className="text-slate-300 font-bold px-1">→</span>
+
+          <Link
+            to="/checkout"
+            className="inline-flex items-center gap-2 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 px-3.5 py-2 text-slate-600 hover:text-slate-900 transition shrink-0"
+          >
+            <ShoppingCart className="h-3.5 w-3.5 text-slate-400" />
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[11px] font-bold text-slate-600">
+              3
+            </span>
+            <span>ชำระเงิน</span>
+          </Link>
+        </div>
+
+        {/* Cart Quick Button */}
+        <button
+          type="button"
+          onClick={() => nav("/checkout")}
+          className="btn-primary text-xs gap-2 py-2.5 px-5 self-end sm:self-auto shrink-0 shadow-sm"
+        >
+          <ShoppingCart className="h-4 w-4" />
+          <span>ตะกร้าสินค้า ({cartCount})</span>
+          {cart && cart.totalAmount > 0 && (
+            <span className="ml-1 rounded-lg bg-white/20 px-2 py-0.5 text-[11px] font-extrabold">
+              {formatTHB(cart.totalAmount)}
+            </span>
+          )}
+        </button>
+      </div>
+
       <PageHeader
         title="เสื้อที่ระลึกงานเลี้ยงรุ่น 2026"
         subtitle="ผ้าคอตตอนคุณภาพพรีเมียม ใส่สบาย พร้อมสกรีนลายพิเศษศิษย์เก่า 2026"
         icon={Shirt}
-        actions={
-          <button
-            className="btn-primary gap-2"
-            onClick={() => nav("/checkout")}
-          >
-            <ShoppingCart className="h-4 w-4" /> ตะกร้าสินค้า ({cartCount})
-          </button>
-        }
       />
-
-      {/* Dual Switcher: Tickets <-> Shirts */}
-      <div className="mb-8 flex justify-center">
-        <div className="inline-flex p-1.5 rounded-2xl bg-slate-100 border border-slate-200/80 shadow-inner">
-          <button
-            type="button"
-            onClick={() => nav("/tickets")}
-            className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition"
-          >
-            <Ticket className="h-4 w-4 text-slate-400" />
-            <span>← 1. ซื้อบัตรเข้างาน</span>
-          </button>
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-extrabold text-brand-700 shadow-sm"
-          >
-            <Shirt className="h-4 w-4 text-brand-600" />
-            <span>2. สั่งซื้อเสื้อที่ระลึก</span>
-          </button>
-        </div>
-      </div>
 
       {products.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center text-slate-500 max-w-md mx-auto">
