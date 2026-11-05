@@ -70,7 +70,7 @@ export function saveMerchandise(actor, input, id) {
     sizes: existing?.sizes || ['S', 'M', 'L', 'XL', '2XL', '3XL'],
     price: data.price,
     stockEnabled: data.stockEnabled,
-    stockBySize: existing?.stockBySize || { S: 0, M: 0, L: 0, XL: 0, '2XL': 0, '3XL': 0 },
+    stockBySize: input.stockBySize || existing?.stockBySize || { S: 0, M: 0, L: 0, XL: 0, '2XL': 0, '3XL': 0 },
     isActive: data.isActive,
     createdAt: existing?.createdAt || nowIso(),
     updatedAt: nowIso(),

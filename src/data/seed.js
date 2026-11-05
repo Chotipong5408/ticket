@@ -187,8 +187,8 @@ export function getSeedData() {
       imageKind: 'sky',
       sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
       price: 490,
-      stockEnabled: false,
-      stockBySize: {},
+      stockEnabled: true,
+      stockBySize: { S: 15, M: 30, L: 35, XL: 25, '2XL': 15, '3XL': 10 },
       isActive: true,
       createdAt: created,
       updatedAt: created,
@@ -735,7 +735,25 @@ export function getSeedData() {
 
 export function seedIfNeeded() {
   const version = readJson(KEYS.schemaVersion, null)
-  if (version === SCHEMA_VERSION && Array.isArray(readJson(KEYS.users, null))) return false
+  if (version === SCHEMA_VERSION && Array.isArray(readJson(KEYS.users, null))) {
+    const currentMerch = readJson(KEYS.merchandise, [])
+    let modified = false
+    const updatedMerch = currentMerch.map((m) => {
+      if (m.id === 'mer_polo' && (!m.stockEnabled || !m.stockBySize || Object.keys(m.stockBySize).length === 0)) {
+        modified = true
+        return {
+          ...m,
+          stockEnabled: true,
+          stockBySize: { S: 15, M: 30, L: 35, XL: 25, '2XL': 15, '3XL': 10 },
+        }
+      }
+      return m
+    })
+    if (modified) {
+      writeJson(KEYS.merchandise, updatedMerch)
+    }
+    return false
+  }
   const data = getSeedData()
   Object.entries(data).forEach(([key, value]) => {
     if (key === 'qrSamples') return

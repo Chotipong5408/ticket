@@ -9,7 +9,7 @@ import { useToast } from '../../context/ToastContext'
 import { useLiveData } from '../../hooks/useLiveData'
 import { Modal } from '../../components/ui/Modal'
 import { ShirtArt } from '../../components/ShirtArt'
-import { Shirt, Plus, Download, Edit3, Package } from 'lucide-react'
+import { Shirt, Plus, Download, Edit3 } from 'lucide-react'
 
 export default function AdminMerchandise() {
   useLiveData()
@@ -89,7 +89,7 @@ export default function AdminMerchandise() {
               <div className="mt-3 flex flex-wrap gap-1">
                 {(p.sizes || []).map((s) => (
                   <span key={s} className="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                    {s}
+                    {s} {p.stockEnabled ? `(${p.stockBySize?.[s] ?? 0})` : ''}
                   </span>
                 ))}
               </div>
@@ -155,6 +155,44 @@ export default function AdminMerchandise() {
           </div>
 
           <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pt-2">
+            <input
+              type="checkbox"
+              className="rounded text-brand-600"
+              checked={!!form.stockEnabled}
+              onChange={(e) => setForm({ ...form, stockEnabled: e.target.checked })}
+            />
+            <span>จำกัดและแสดงจำนวนสต็อกตามขนาด (Stock by Size)</span>
+          </label>
+
+          {form.stockEnabled && (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+              <span className="text-[11px] font-bold text-slate-600 block">จำนวนสต็อกแต่ละไซส์</span>
+              <div className="grid grid-cols-3 gap-2">
+                {(form.sizes || ['S', 'M', 'L', 'XL', '2XL', '3XL']).map((sz) => (
+                  <div key={sz}>
+                    <label className="text-[10px] font-semibold text-slate-500 block mb-0.5">ไซส์ {sz}</label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="input text-xs py-1"
+                      value={form.stockBySize?.[sz] ?? 0}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          stockBySize: {
+                            ...(form.stockBySize || {}),
+                            [sz]: Math.max(0, parseInt(e.target.value, 10) || 0),
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pt-1">
             <input
               type="checkbox"
               className="rounded text-brand-600"
