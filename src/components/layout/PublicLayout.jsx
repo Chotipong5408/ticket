@@ -47,9 +47,6 @@ export default function PublicLayout() {
         <Outlet />
       </main>
       <footer className="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-400">
-        <p>
-          ระบบ Demo — ข้อมูลจัดเก็บใน Browser (LocalStorage/IndexedDB) เท่านั้น
-        </p>
         <p className="mt-1.5 text-slate-300">
           © 2026 Alumni Reunion Management System
         </p>

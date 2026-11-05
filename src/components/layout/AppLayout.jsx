@@ -156,13 +156,13 @@ export default function AppLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 transform bg-white border-r border-slate-200/80 shadow-xl lg:shadow-none transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 transform bg-white border-r border-slate-200/80 shadow-xl lg:shadow-none transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex h-full flex-col">
           {/* Logo / Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 shrink-0">
             <Link to="/" className="flex items-center gap-2.5 group">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white shadow-sm group-hover:scale-105 transition">
                 <GraduationCap className="h-5 w-5" />
@@ -222,7 +222,7 @@ export default function AppLayout() {
           </nav>
 
           {/* Bottom Logout Link */}
-          <div className="border-t border-slate-100 p-4 bg-slate-50/50">
+          <div className="border-t border-slate-100 p-4 bg-slate-50/50 shrink-0">
             <button
               onClick={handleLogout}
               className="flex w-full items-center justify-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition"
