@@ -1,15 +1,18 @@
 import { Modal } from './ui/Modal'
 import { QrBox } from './QrBox'
 import { encodeQr } from '../lib/qr'
-import { formatToken } from '../lib/money'
+import { formatToken, formatTHB } from '../lib/money'
 import { walletSummary } from '../services/tokenService'
 import { useLiveData } from '../hooks/useLiveData'
-import { Sparkles, Store, CircleDollarSign } from 'lucide-react'
+import { settingsRepo } from '../repositories'
+import { Sparkles, Store, CircleDollarSign, Coins } from 'lucide-react'
 
 export function UserQrModal({ open, onClose, user }) {
   useLiveData()
   if (!user) return null
   const w = walletSummary(user.id)
+  const settings = settingsRepo.get() || {}
+  const tokenRate = Number(settings.tokenPriceTHB) || 10
 
   return (
     <Modal
@@ -27,11 +30,20 @@ export function UserQrModal({ open, onClose, user }) {
           <p className="text-xs text-slate-300 mt-0.5">
             รุ่นปี พ.ศ. {user.enrollmentYearBE || '-'} · {user.faculty || '-'}
           </p>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-md px-3.5 py-1.5 border border-white/15">
-            <span className="text-xs text-slate-300">ยอดคงเหลือ:</span>
-            <span className="text-base font-black text-amber-300">
-              {formatToken(w.balance)} TOKEN
-            </span>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+            <div className="inline-flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-md px-3.5 py-1.5 border border-white/15">
+              <span className="text-xs text-slate-300">ยอดคงเหลือ:</span>
+              <span className="text-base font-black text-amber-300">
+                {formatToken(w.balance)}
+              </span>
+              <span className="text-xs font-semibold text-emerald-300">
+                ({formatTHB(w.balance * tokenRate)})
+              </span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 backdrop-blur-md px-3 py-1.5 border border-white/15 text-xs text-slate-200">
+              <Coins className="h-3.5 w-3.5 text-amber-300" />
+              <span>เรท: <strong>1 Token = {tokenRate} บาท</strong></span>
+            </div>
           </div>
         </div>
 

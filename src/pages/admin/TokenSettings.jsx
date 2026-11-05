@@ -5,28 +5,34 @@ import { saveSettings } from "../../services/catalogService";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { useLiveData } from "../../hooks/useLiveData";
-import { Coins, Save, Plus, Package } from "lucide-react";
+import { Coins, Save } from "lucide-react";
 
 export default function TokenSettings() {
   useLiveData();
   const { user } = useAuth();
   const toast = useToast();
   const s = settingsRepo.get();
-  const [price, setPrice] = useState(s.tokenPriceTHB);
-  const [packages, setPackages] = useState(s.tokenPackages || []);
+  const [price, setPrice] = useState(s.tokenPriceTHB || 10);
+
+  function handlePriceChange(e) {
+    const v = e.target.value.slice(0, 9);
+    setPrice(v);
+  }
 
   function save() {
     try {
+      const numPrice = Number(price);
+      if (numPrice <= 0 || isNaN(numPrice)) {
+        toast.push("กรุณาระบุอัตราแลกเปลี่ยนที่มากกว่า 0 บาท", "error");
+        return;
+      }
+
       saveSettings(user, {
-        tokenPriceTHB: Number(price),
-        tokenPackages: packages.map((p) => ({
-          ...p,
-          tokens: Number(p.tokens),
-          price: Number(p.price),
-        })),
+        tokenPriceTHB: numPrice,
+        tokenPackages: [],
       });
       toast.push(
-        "บันทึกการตั้งค่าราคาและแพ็กเกจ Token เรียบร้อยแล้ว",
+        "บันทึกการตั้งค่าราคา Token เรียบร้อยแล้ว",
         "success",
       );
     } catch (e) {
@@ -34,11 +40,13 @@ export default function TokenSettings() {
     }
   }
 
+  const currentRate = Number(price) || 10;
+
   return (
     <div className="space-y-6 max-w-2xl">
       <PageHeader
-        title="ตั้งค่าราคาและแพ็กเกจ Token"
-        subtitle="กำหนดอัตราแลกเปลี่ยน Token ต่อบาท และแพ็กเกจสำหรับจุดบริการเติมเงิน (Event Admin)"
+        title="ตั้งค่าราคา Token"
+        subtitle="กำหนดอัตราแลกเปลี่ยน Token ต่อบาท สำหรับจุดบริการเติมเงิน (Event Admin)"
         icon={Coins}
       />
 
@@ -51,58 +59,21 @@ export default function TokenSettings() {
             <input
               className="input pr-12 font-bold text-slate-800"
               type="number"
+              min="1"
+              max="999999999"
               value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              onChange={handlePriceChange}
+              onInput={(e) => {
+                if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+              }}
             />
             <span className="absolute right-3 top-2.5 text-xs font-semibold text-slate-400">
               บาท
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
-            ใช้สำหรับการคำนวณราคาเริ่มต้นและรายงานสถิติ
+          <p className="text-[11px] text-slate-400 mt-1.5">
+            เรทหลักของระบบ: <strong>1 Token = {currentRate} บาท</strong> (ใช้คำนวณยอดเงินเทียบเท่าและจุดบริการเติมเงิน)
           </p>
-        </div>
-
-        <div className="pt-4 border-t border-slate-100">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-3">
-            แพ็กเกจเติมเงินสำเร็จรูป (Token Packages)
-          </label>
-
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3 text-[11px] font-bold text-slate-400 px-1">
-              <span>จำนวน Token</span>
-              <span>ราคาขาย (บาท)</span>
-            </div>
-
-            {packages.map((p, i) => (
-              <div key={p.id || i} className="grid grid-cols-2 gap-3">
-                <input
-                  className="input text-xs font-bold"
-                  placeholder="จำนวน Token"
-                  value={p.tokens}
-                  onChange={(e) =>
-                    setPackages(
-                      packages.map((x, idx) =>
-                        idx === i ? { ...x, tokens: e.target.value } : x,
-                      ),
-                    )
-                  }
-                />
-                <input
-                  className="input text-xs font-bold"
-                  placeholder="ราคา (บาท)"
-                  value={p.price}
-                  onChange={(e) =>
-                    setPackages(
-                      packages.map((x, idx) =>
-                        idx === i ? { ...x, price: e.target.value } : x,
-                      ),
-                    )
-                  }
-                />
-              </div>
-            ))}
-          </div>
         </div>
 
         <div className="pt-4 border-t border-slate-100">

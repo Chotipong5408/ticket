@@ -691,11 +691,7 @@ export function getSeedData() {
     eventName: 'งานเลี้ยงรุ่นศิษย์เก่า 2026',
     siteUrl: 'https://alumni-reunion.demo',
     tokenPriceTHB: 10,
-    tokenPackages: [
-      { id: 'pkg_10', tokens: 10, price: 100 },
-      { id: 'pkg_20', tokens: 20, price: 200 },
-      { id: 'pkg_50', tokens: 50, price: 450 },
-    ],
+    tokenPackages: [],
     shippingFee: 50,
     reentryPolicy: 'deny',
     demoQrNote: true,

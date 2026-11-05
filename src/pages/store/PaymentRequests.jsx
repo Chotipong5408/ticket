@@ -117,14 +117,21 @@ export default function StorePaymentRequests() {
                   <input
                     type="number"
                     min="1"
+                    max="999999999"
                     className="input text-center font-bold"
                     value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                    onChange={(e) => {
+                      const val = e.target.value.slice(0, 9);
+                      setQuantity(Math.min(999999999, Math.max(1, parseInt(val, 10) || 1)));
+                    }}
+                    onInput={(e) => {
+                      if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                    }}
                   />
                   <button
                     type="button"
                     className="btn-secondary h-10 w-10 text-lg font-bold"
-                    onClick={() => setQuantity((q) => q + 1)}
+                    onClick={() => setQuantity((q) => Math.min(999999999, q + 1))}
                   >
                     +
                   </button>

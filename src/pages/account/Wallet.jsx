@@ -3,10 +3,11 @@ import { PageHeader } from "../../components/ui/PageHeader";
 import { QrBox } from "../../components/QrBox";
 import { useAuth } from "../../context/AuthContext";
 import { walletSummary } from "../../services/tokenService";
-import { formatToken } from "../../lib/money";
+import { formatToken, formatTHB } from "../../lib/money";
 import { encodeQr } from "../../lib/qr";
 import { useLiveData } from "../../hooks/useLiveData";
 import { UserQrModal } from "../../components/UserQrModal";
+import { settingsRepo } from "../../repositories";
 import {
   Wallet,
   Coins,
@@ -16,6 +17,7 @@ import {
   Sparkles,
   History,
   QrCode,
+  Banknote,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -23,6 +25,8 @@ export default function AccountWallet() {
   useLiveData();
   const { user } = useAuth();
   const w = walletSummary(user.id);
+  const settings = settingsRepo.get() || {};
+  const tokenRate = Number(settings.tokenPriceTHB) || 10;
   const [qrOpen, setQrOpen] = useState(false);
 
   return (
@@ -58,7 +62,20 @@ export default function AccountWallet() {
                 TOKEN
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-2">
+
+            {/* Rate & Estimated Value Badges */}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 backdrop-blur-md px-3 py-1 border border-white/15 text-xs text-brand-200">
+                <Coins className="h-3.5 w-3.5 text-amber-300" />
+                <span>เรทระบบ: <strong className="text-white font-bold">1 Token = {tokenRate} บาท</strong></span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 backdrop-blur-md px-3 py-1 border border-white/15 text-xs text-brand-200">
+                <Banknote className="h-3.5 w-3.5 text-emerald-300" />
+                <span>มูลค่าเทียบเท่า: <strong className="text-emerald-300 font-bold">{formatTHB(w.balance * tokenRate)}</strong></span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-400 mt-3">
               เจ้าของบัญชี:{" "}
               <span className="text-white font-medium">{user.fullName}</span>{" "}
               (ID: <code className="font-mono text-brand-200">{user.id}</code>)
@@ -75,6 +92,29 @@ export default function AccountWallet() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Rate Card */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+              <Coins className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm">อัตราแลกเปลี่ยน Token ตามระบบ</h3>
+              <p className="text-xs text-slate-500">กำหนดโดยผู้ดูแลระบบ (Super Admin) สำหรับการใช้จ่ายและเติมเงินในงาน</p>
+            </div>
+          </div>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 font-black text-sm self-start sm:self-auto">
+            <span>1 Token</span>
+            <span className="text-amber-400">＝</span>
+            <span className="text-brand-600">{tokenRate} บาท</span>
+          </div>
+        </div>
+        <p className="text-[11px] text-slate-400 mt-3">
+          * สมาชิกสามารถยื่น QR Code ประจำตัวที่จุดบริการ Event Admin เพื่อชำระเงินสดและเติม Token เข้ากระเป๋าได้ทันที
+        </p>
       </div>
 
       {/* Stats Breakdown Grid */}

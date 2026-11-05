@@ -141,8 +141,16 @@ export default function AdminTicketTypes() {
               <input
                 className="input"
                 type="number"
+                min="0"
+                max="999999999"
                 value={form.price ?? ''}
-                onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                onChange={(e) => {
+                  const val = e.target.value.slice(0, 9);
+                  setForm({ ...form, price: val === '' ? '' : Math.max(0, Number(val)) });
+                }}
+                onInput={(e) => {
+                  if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                }}
               />
             </div>
             <div>
@@ -150,8 +158,16 @@ export default function AdminTicketTypes() {
               <input
                 className="input"
                 type="number"
+                min="0"
+                max="999999999"
                 value={form.bonusToken ?? ''}
-                onChange={(e) => setForm({ ...form, bonusToken: Number(e.target.value) })}
+                onChange={(e) => {
+                  const val = e.target.value.slice(0, 9);
+                  setForm({ ...form, bonusToken: val === '' ? '' : Math.max(0, Number(val)) });
+                }}
+                onInput={(e) => {
+                  if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                }}
               />
             </div>
           </div>
@@ -172,9 +188,17 @@ export default function AdminTicketTypes() {
             <input
               className="input"
               type="number"
+              min="0"
+              max="999999999"
               placeholder="เช่น 100"
               value={form.stockLimit ?? ''}
-              onChange={(e) => setForm({ ...form, stockLimit: e.target.value ? Number(e.target.value) : '' })}
+              onChange={(e) => {
+                const val = e.target.value.slice(0, 9);
+                setForm({ ...form, stockLimit: val ? Math.max(0, Number(val)) : '' });
+              }}
+              onInput={(e) => {
+                if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+              }}
             />
           </div>
 

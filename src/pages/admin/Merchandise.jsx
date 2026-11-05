@@ -137,9 +137,17 @@ export default function AdminMerchandise() {
             <input
               className="input"
               type="number"
+              min="0"
+              max="999999999"
               placeholder="350"
               value={form.price ?? ''}
-              onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+              onChange={(e) => {
+                const val = e.target.value.slice(0, 9);
+                setForm({ ...form, price: val === '' ? '' : Math.max(0, Number(val)) });
+              }}
+              onInput={(e) => {
+                if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+              }}
             />
           </div>
 
@@ -174,17 +182,22 @@ export default function AdminMerchandise() {
                     <input
                       type="number"
                       min="0"
+                      max="999999999"
                       className="input text-xs py-1"
                       value={form.stockBySize?.[sz] ?? 0}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const val = e.target.value.slice(0, 9);
                         setForm({
                           ...form,
                           stockBySize: {
                             ...(form.stockBySize || {}),
-                            [sz]: Math.max(0, parseInt(e.target.value, 10) || 0),
+                            [sz]: Math.min(999999999, Math.max(0, parseInt(val, 10) || 0)),
                           },
-                        })
-                      }
+                        });
+                      }}
+                      onInput={(e) => {
+                        if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                      }}
                     />
                   </div>
                 ))}

@@ -168,9 +168,17 @@ export default function AdminStores() {
               <input
                 className="input"
                 type="number"
+                min="0"
+                max="999999999"
                 placeholder="10"
                 value={form.priceToken ?? ''}
-                onChange={(e) => setForm({ ...form, priceToken: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value.slice(0, 9);
+                  setForm({ ...form, priceToken: val });
+                }}
+                onInput={(e) => {
+                  if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                }}
               />
             </div>
           </div>

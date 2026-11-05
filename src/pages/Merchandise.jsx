@@ -215,12 +215,15 @@ export default function Merchandise() {
                         className="input w-20 text-center font-bold disabled:bg-slate-100 disabled:text-slate-400"
                         type="number"
                         min="1"
-                        max={maxQty}
+                        max={Math.min(999999999, maxQty)}
                         disabled={isOutOfStock}
                         value={isOutOfStock ? 0 : qty[p.id] !== undefined ? qty[p.id] : 1}
                         onFocus={(e) => e.target.select()}
+                        onInput={(e) => {
+                          if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                        }}
                         onChange={(e) => {
-                          const val = e.target.value;
+                          const val = e.target.value.slice(0, 9);
                           if (val === '') {
                             setQty({ ...qty, [p.id]: '' });
                           } else {

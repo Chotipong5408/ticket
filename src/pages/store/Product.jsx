@@ -69,8 +69,15 @@ export default function StoreProduct() {
               className="input pr-16 text-xs font-bold text-brand-700"
               type="number"
               min="1"
+              max="999999999"
               value={form.priceToken}
-              onChange={(e) => setForm({ ...form, priceToken: e.target.value })}
+              onChange={(e) => {
+                const val = e.target.value.slice(0, 9);
+                setForm({ ...form, priceToken: val });
+              }}
+              onInput={(e) => {
+                if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+              }}
               required
             />
             <span className="absolute right-3 top-2.5 text-xs font-semibold text-slate-400">Token</span>

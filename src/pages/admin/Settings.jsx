@@ -72,8 +72,16 @@ export default function AdminSettings() {
             <input
               className="input text-xs"
               type="number"
+              min="0"
+              max="999999999"
               value={form.shippingFee ?? 0}
-              onChange={(e) => setForm({ ...form, shippingFee: Number(e.target.value) })}
+              onChange={(e) => {
+                const val = e.target.value.slice(0, 9);
+                setForm({ ...form, shippingFee: val === '' ? '' : Math.max(0, Number(val)) });
+              }}
+              onInput={(e) => {
+                if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+              }}
             />
           </div>
 

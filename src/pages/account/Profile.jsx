@@ -76,8 +76,16 @@ export default function Profile() {
               <input
                 className="input"
                 type="number"
+                min="1"
+                max="999999999"
                 value={form.enrollmentYearBE}
-                onChange={(e) => setForm({ ...form, enrollmentYearBE: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value.slice(0, 9);
+                  setForm({ ...form, enrollmentYearBE: val });
+                }}
+                onInput={(e) => {
+                  if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                }}
                 required
               />
             </div>

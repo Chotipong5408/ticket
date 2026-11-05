@@ -616,7 +616,13 @@ function AttendeeForm({ index, attendee, isOwnerSlot, onChange, onRemove }) {
           className="input text-xs"
           placeholder="ปี พ.ศ. ที่เข้าเรียน (เช่น 2560) *"
           value={attendee.enrollmentYearBE}
-          onChange={(e) => onChange("enrollmentYearBE", e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value.slice(0, 9);
+            onChange("enrollmentYearBE", val);
+          }}
+          onInput={(e) => {
+            if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+          }}
           type="number"
           min="2400"
           max="2600"

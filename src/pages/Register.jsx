@@ -99,9 +99,17 @@ export default function Register() {
               </label>
               <input
                 type="number"
+                min="1"
+                max="999999999"
                 className={`input ${errors.enrollmentYearBE ? 'border-red-400 ring-red-300' : ''}`}
                 value={form.enrollmentYearBE}
-                onChange={set('enrollmentYearBE')}
+                onChange={(e) => {
+                  const val = e.target.value.slice(0, 9);
+                  setForm({ ...form, enrollmentYearBE: val });
+                }}
+                onInput={(e) => {
+                  if (e.target.value.length > 9) e.target.value = e.target.value.slice(0, 9);
+                }}
                 placeholder="เช่น 2545"
                 required
               />
