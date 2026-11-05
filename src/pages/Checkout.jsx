@@ -49,7 +49,7 @@ export default function Checkout() {
   function saveShip(e) {
     const next = { ...ship, [e.target.name]: e.target.value }
     setShip(next)
-    updateCart(user.id, { ...quote.cart, shipping: next })
+    updateCart(user.id, { ...quote.cart, shippingMethod: 'delivery', shipping: next })
   }
 
   const handleRemoveTicket = (ticketTypeId) => {
@@ -92,14 +92,20 @@ export default function Checkout() {
 
   function place() {
     try {
-      if (quote.shippingMethod === 'delivery') {
-        updateCart(user.id, { ...quote.cart, shipping: ship })
+      if (quote.merchLines.length > 0) {
+        updateCart(user.id, { ...quote.cart, shippingMethod: 'delivery', shipping: ship })
       }
       const { payment } = checkout(user)
       toast.push('สร้างคำสั่งซื้อสำเร็จ กรุณาดำเนินการชำระเงิน', 'success')
       nav(`/payment/${payment.id}`)
     } catch (e) {
-      toast.push(e.message, 'error')
+      if (e.issues && e.issues[0]?.message) {
+        toast.push(e.issues[0].message, 'error')
+      } else if (e.errors && e.errors[0]?.message) {
+        toast.push(e.errors[0].message, 'error')
+      } else {
+        toast.push(e.message, 'error')
+      }
     }
   }
 

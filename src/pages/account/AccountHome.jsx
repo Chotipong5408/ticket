@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { useAuth } from "../../context/AuthContext";
@@ -5,6 +6,7 @@ import { walletSummary } from "../../services/tokenService";
 import { ordersRepo, ticketsRepo, merchOrdersRepo } from "../../repositories";
 import { formatToken } from "../../lib/money";
 import { useLiveData } from "../../hooks/useLiveData";
+import { UserQrModal } from "../../components/UserQrModal";
 import {
   User,
   Wallet,
@@ -13,11 +15,8 @@ import {
   History,
   Shirt,
   ArrowRight,
-  Sparkles,
   QrCode,
-  ScanLine,
   LayoutDashboard,
-  Coins,
   CheckCircle2,
   Package,
   Gift,
@@ -80,6 +79,7 @@ export default function AccountHome() {
   const userMerchOrders = merchOrdersRepo
     .all()
     .filter((m) => m.userId === user.id);
+  const [qrOpen, setQrOpen] = useState(false);
 
   return (
     <div className="space-y-8">
@@ -104,12 +104,13 @@ export default function AccountHome() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <Link
-              to="/scan-payment"
+            <button
+              type="button"
+              onClick={() => setQrOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl bg-white text-brand-700 text-xs font-bold px-4 py-2.5 shadow hover:bg-brand-50 transition"
             >
-              <ScanLine className="h-4 w-4" /> สแกนจ่ายร้านค้า
-            </Link>
+              <QrCode className="h-4 w-4" /> เปิด QR ของฉัน
+            </button>
           </div>
         </div>
       </div>
@@ -359,6 +360,9 @@ export default function AccountHome() {
           })}
         </div>
       </div>
+
+      {/* QR Modal */}
+      <UserQrModal open={qrOpen} onClose={() => setQrOpen(false)} user={user} />
     </div>
   );
 }

@@ -22,6 +22,7 @@ import {
   Key,
 } from 'lucide-react'
 import { useState } from 'react'
+import { FACULTIES, getMajorsByFaculty } from '../data/faculties'
 
 /** Empty attendee form template */
 const emptyAttendee = () => ({
@@ -462,20 +463,52 @@ function AttendeeForm({ index, attendee, isOwnerSlot, onChange, onRemove }) {
             readOnly={isOwnerSlot}
           />
         </div>
-        <input
-          className="input text-xs"
-          placeholder="คณะ *"
-          value={attendee.faculty}
-          onChange={(e) => onChange('faculty', e.target.value)}
-          readOnly={isOwnerSlot}
-        />
-        <input
-          className="input text-xs"
-          placeholder="สาขา *"
-          value={attendee.major}
-          onChange={(e) => onChange('major', e.target.value)}
-          readOnly={isOwnerSlot}
-        />
+        {isOwnerSlot ? (
+          <input
+            className="input text-xs"
+            placeholder="คณะ *"
+            value={attendee.faculty}
+            readOnly
+          />
+        ) : (
+          <select
+            className="input text-xs"
+            value={attendee.faculty}
+            onChange={(e) => {
+              const fac = e.target.value
+              onChange('faculty', fac)
+              const majors = getMajorsByFaculty(fac)
+              if (!majors.includes(attendee.major)) {
+                onChange('major', '')
+              }
+            }}
+          >
+            <option value="">-- เลือกคณะ * --</option>
+            {FACULTIES.map((f) => (
+              <option key={f.name} value={f.name}>{f.name}</option>
+            ))}
+          </select>
+        )}
+        {isOwnerSlot ? (
+          <input
+            className="input text-xs"
+            placeholder="สาขา *"
+            value={attendee.major}
+            readOnly
+          />
+        ) : (
+          <select
+            className="input text-xs"
+            value={attendee.major}
+            onChange={(e) => onChange('major', e.target.value)}
+            disabled={!attendee.faculty}
+          >
+            <option value="">{attendee.faculty ? '-- เลือกสาขา * --' : '-- เลือกคณะก่อน --'}</option>
+            {getMajorsByFaculty(attendee.faculty).map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+        )}
         <input
           className="input text-xs"
           placeholder="ปี พ.ศ. ที่เข้าเรียน (เช่น 2560) *"

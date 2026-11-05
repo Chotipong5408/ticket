@@ -20,7 +20,6 @@ export function dashboardStats() {
   const tickets = ticketsRepo.all()
   const payments = paymentsRepo.all()
   const orders = ordersRepo.all()
-  const approved = payments.filter((p) => p.status === 'approved')
   const approvedOrders = orders.filter((o) => o.status === 'approved')
   const ticketRevenue = approvedOrders.reduce((s, o) => s + (o.subtotalTickets || 0), 0)
   const merchRevenue = approvedOrders.reduce((s, o) => s + (o.subtotalMerchandise || 0) + (o.shippingFee || 0), 0)
@@ -79,10 +78,16 @@ export function exportMerchandiseCsv(actor) {
       จำนวน: item.quantity,
       ราคาต่อชิ้น: item.unitPrice,
       ยอดรวม: item.unitPrice * item.quantity,
-      วิธีรับสินค้า: m.shippingMethod === 'delivery' ? 'จัดส่ง' : 'รับภายในงาน',
-      ชื่อผู้รับ: m.recipientName,
-      เบอร์โทรศัพท์: m.phone,
-      ที่อยู่: [m.address, m.province, m.postalCode].filter(Boolean).join(' '),
+      วิธีรับสินค้า: m.shippingMethod === 'delivery' || order?.shippingMethod === 'delivery' ? 'จัดส่ง' : 'รับภายในงาน',
+      ชื่อผู้รับ: m.recipientName || order?.shipping?.recipientName || user?.fullName || '',
+      เบอร์โทรศัพท์: m.phone || order?.shipping?.phone || user?.phone || '',
+      ที่อยู่: [
+        m.address || order?.shipping?.address,
+        m.province || order?.shipping?.province,
+        m.postalCode || order?.shipping?.postalCode,
+      ]
+        .filter(Boolean)
+        .join(' '),
       วันที่สั่งซื้อ: m.createdAt,
       สถานะการชำระเงิน: payment?.status || order?.status,
       สถานะการจัดส่ง: m.fulfillmentStatus,

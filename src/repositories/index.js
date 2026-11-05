@@ -285,7 +285,7 @@ export const settingsRepo = {
 export const cartsRepo = {
   get(userId) {
     const all = readJson(KEYS.carts, {})
-    return all[userId] || { tickets: [], merchandise: [], shippingMethod: 'pickup', shipping: null }
+    return all[userId] || { tickets: [], merchandise: [], shippingMethod: 'delivery', shipping: null }
   },
   save(userId, cart) {
     const all = readJson(KEYS.carts, {})

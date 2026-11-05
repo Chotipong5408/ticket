@@ -38,7 +38,7 @@ export function scanTicket(actor, rawOrId, { forceReentry = false } = {}) {
   }
   if (result === 'already_used') {
     const settings = settingsRepo.get()
-    if (forceReentry && actor.role === 'super_admin' && settings.reentryPolicy === 'allow_admin') {
+    if (forceReentry && (actor.role === 'super_admin' || actor.role === 'token_admin') && settings.reentryPolicy === 'allow_admin') {
       ticketsRepo.upsert({ ...ticket, status: 'issued', checkedInAt: null, checkedInBy: null })
       logAction({ actor, action: 'checkin.reentry_reset', resourceType: 'ticket', resourceId: ticket.id })
       return scanTicket(actor, ticket.id)

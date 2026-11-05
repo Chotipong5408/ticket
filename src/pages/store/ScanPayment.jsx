@@ -9,7 +9,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { formatToken } from '../../lib/money'
 import { useLiveData } from '../../hooks/useLiveData'
-import { UserCheck, ShoppingBag, CreditCard, AlertCircle } from 'lucide-react'
+import { UserCheck, CreditCard, AlertCircle } from 'lucide-react'
 
 export default function StoreScanPayment() {
   useLiveData()

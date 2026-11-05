@@ -8,7 +8,7 @@ import { formatDateTime } from '../../lib/dates'
 import { usersRepo, settingsRepo } from '../../repositories'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
-import { ScanLine, CheckCircle2, XCircle, AlertCircle, Ticket, User, Clock, ShieldCheck, RefreshCw } from 'lucide-react'
+import { ScanLine, CheckCircle2, AlertCircle, Ticket, Clock, RefreshCw } from 'lucide-react'
 
 export default function AdminCheckin() {
   const { user } = useAuth()
@@ -141,7 +141,7 @@ export default function AdminCheckin() {
               )}
 
               {/* Re-entry Action button */}
-              {result.result === 'already_used' && user.role === 'super_admin' && policy === 'allow_admin' && (
+              {result.result === 'already_used' && (user.role === 'super_admin' || user.role === 'token_admin') && policy === 'allow_admin' && (
                 <div className="pt-2">
                   <button
                     className="btn-warning w-full py-2.5 text-xs font-bold gap-2"

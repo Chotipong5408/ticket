@@ -4,7 +4,7 @@ import { storesRepo, productsRepo } from '../../repositories'
 import { storeReport } from '../../services/reportService'
 import { formatToken } from '../../lib/money'
 import { useLiveData } from '../../hooks/useLiveData'
-import { Store, QrCode, ScanLine, ShoppingBag, Coins, CheckCircle2, ArrowRight, Tag } from 'lucide-react'
+import { Store, ScanLine, ShoppingBag, Coins, CheckCircle2, ArrowRight, Tag } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export default function StoreDashboard() {
@@ -49,16 +49,10 @@ export default function StoreDashboard() {
 
           <div className="flex items-center gap-2.5">
             <Link
-              to="/store/payment-requests"
+              to="/store/scan-payment"
               className="inline-flex items-center gap-2 rounded-xl bg-brand-500 hover:bg-brand-400 text-slate-900 text-xs font-bold px-4 py-2.5 shadow transition"
             >
-              <QrCode className="h-4 w-4" /> สร้าง QR รับชำระ
-            </Link>
-            <Link
-              to="/store/scan-payment"
-              className="inline-flex items-center gap-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold px-4 py-2.5 border border-white/20 backdrop-blur-sm transition"
-            >
-              <ScanLine className="h-4 w-4" /> สแกนลูกค้า
+              <ScanLine className="h-4 w-4" /> สแกน QR ลูกค้าตัด Token
             </Link>
           </div>
         </div>
@@ -103,14 +97,14 @@ export default function StoreDashboard() {
         {/* Requests count */}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">คำขอชำระทั้งหมด</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">รายการรับชำระทั้งหมด</span>
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 border border-brand-200/60">
-              <QrCode className="h-5 w-5" />
+              <ScanLine className="h-5 w-5" />
             </div>
           </div>
           <div>
             <p className="text-3xl font-black text-slate-900 tracking-tight">{report.requests} <span className="text-sm font-normal text-slate-400">ครั้ง</span></p>
-            <p className="text-xs text-brand-600 font-medium mt-1">สร้างผ่าน QR & หน้าร้าน</p>
+            <p className="text-xs text-brand-600 font-medium mt-1">รับชำระผ่านการสแกน QR ลูกค้า</p>
           </div>
         </div>
       </div>

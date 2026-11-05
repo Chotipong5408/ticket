@@ -2,12 +2,12 @@ import { PageHeader } from '../../components/ui/PageHeader'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { QrBox } from '../../components/QrBox'
 import { TICKET_LABELS } from '../../data/labels'
-import { ticketsRepo, emailRepo } from '../../repositories'
+import { ticketsRepo, emailRepo, paymentsRepo } from '../../repositories'
 import { encodeQr } from '../../lib/qr'
 import { formatDateTime } from '../../lib/dates'
 import { useAuth } from '../../context/AuthContext'
 import { useLiveData } from '../../hooks/useLiveData'
-import { Ticket, Mail, Clock, CheckCircle2, AlertCircle, Share2, Download } from 'lucide-react'
+import { Ticket, Mail, Clock, CheckCircle2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export default function MyTickets() {
@@ -43,6 +43,7 @@ export default function MyTickets() {
           {tickets.map((t) => {
             const isReady = t.qrToken && (t.status === 'issued' || t.status === 'used')
             const isUsed = t.status === 'used'
+            const payment = t.orderId ? paymentsRepo.findByOrder(t.orderId) : null
 
             return (
               <div
@@ -94,7 +95,7 @@ export default function MyTickets() {
                       <p className="text-amber-700/80 text-[11px]">
                         เมื่อ Super Admin ตรวจสอบสลิปโอนเงินแล้ว QR Ticket จะแสดงที่นี่โดยอัตโนมัติ
                       </p>
-                      <Link to={`/payment/${t.paymentId || ''}`} className="btn-secondary text-[11px] py-1.5 px-3 inline-block mt-2">
+                      <Link to={payment ? `/payment/${payment.id}` : '/account/orders'} className="btn-secondary text-[11px] py-1.5 px-3 inline-block mt-2">
                         ตรวจดูสถานะสลิป
                       </Link>
                     </div>

@@ -1,17 +1,14 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { DEMO_PASSWORD } from "../data/seed";
 import { ROLE_LABELS } from "../data/permissions";
 import {
-  LogIn,
   Eye,
   EyeOff,
   ShieldCheck,
   GraduationCap,
-  ArrowRight,
-  UserCheck,
 } from "lucide-react";
 
 const quickLogins = [
@@ -52,6 +49,8 @@ export default function Login() {
   const { login, user } = useAuth();
   const toast = useToast();
   const nav = useNavigate();
+  const location = useLocation();
+  const redirect = new URLSearchParams(location.search).get("redirect");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -59,7 +58,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   if (user) {
-    nav(roleHome[user.role] || "/account", { replace: true });
+    nav((user.role === "user" && redirect) ? redirect : (roleHome[user.role] || "/account"), { replace: true });
     return null;
   }
 
@@ -70,7 +69,8 @@ export default function Login() {
     try {
       const u = login(email, password);
       toast.push(`ยินดีต้อนรับ ${u.fullName}`, "success");
-      nav(roleHome[u.role] || "/account");
+      const target = (u.role === "user" && redirect) ? redirect : (roleHome[u.role] || "/account");
+      nav(target);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -87,7 +87,8 @@ export default function Login() {
         `เข้าสู่ระบบเป็น ${u.fullName} (${ROLE_LABELS[u.role]})`,
         "success",
       );
-      nav(roleHome[u.role] || "/account");
+      const target = (u.role === "user" && redirect) ? redirect : (roleHome[u.role] || "/account");
+      nav(target);
     } catch (err) {
       setError(err.message);
     }

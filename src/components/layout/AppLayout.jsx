@@ -28,8 +28,6 @@ import {
   Package,
   BadgeCheck,
   CircleDollarSign,
-  ArrowUpRight,
-  Sparkles,
 } from "lucide-react";
 
 const NAV = {
@@ -66,6 +64,7 @@ const NAV = {
   ],
   token_admin: [
     { label: "Dashboard", to: "/token-admin/dashboard", icon: LayoutDashboard },
+    { label: "ตรวจบัตรเข้างาน (Check-in)", to: "/admin/checkin", icon: Ticket },
     { label: "เติม Token", to: "/token-admin/topup", icon: CircleDollarSign },
     { label: "ประวัติธุรกรรม", to: "/token-admin/transactions", icon: History },
     { label: "สแกน QR ผู้ใช้", to: "/token-admin/scan", icon: ScanLine },
@@ -73,8 +72,7 @@ const NAV = {
   store_admin: [
     { label: "Dashboard", to: "/store/dashboard", icon: LayoutDashboard },
     { label: "จัดการสินค้า", to: "/store/product", icon: Package },
-    { label: "สร้าง QR ขาย", to: "/store/payment-requests", icon: QrCode },
-    { label: "สแกนรับชำระ", to: "/store/scan-payment", icon: ScanLine },
+    { label: "สแกน QR ตัด Token", to: "/store/scan-payment", icon: ScanLine },
     { label: "ประวัติธุรกรรม", to: "/store/transactions", icon: History },
     { label: "รายงานร้านค้า", to: "/store/reports", icon: BarChart3 },
   ],
@@ -174,7 +172,7 @@ export default function AppLayout() {
                   งานเลี้ยงรุ่นศิษย์เก่า 2026
                 </span>
                 <span className="text-[11px] text-slate-400 font-medium">
-                  ระบบลงทะเบียน & บัตร
+                  ระบบลงทะเบียน & ขายบัตร
                 </span>
               </div>
             </Link>

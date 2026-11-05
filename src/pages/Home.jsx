@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { DEMO_PASSWORD } from "../data/seed";
 import heroBanquetImg from "../assets/hero-banquet.jpg";
 import {
   Ticket,
@@ -8,13 +7,8 @@ import {
   CreditCard,
   QrCode,
   Coins,
-  Store,
-  BarChart3,
   ArrowRight,
   GraduationCap,
-  ShieldCheck,
-  Sparkles,
-  CheckCircle2,
   Calendar,
   MapPin,
 } from "lucide-react";
@@ -67,37 +61,6 @@ const steps = [
     desc: "สแกนซื้ออาหาร เครื่องดื่ม ร้านค้าภายในงาน",
     to: "/account/wallet",
     color: "from-cyan-500 to-blue-600",
-  },
-];
-
-const demoAccounts = [
-  {
-    label: "ผู้ใช้ทั่วไป (User)",
-    email: "user@demo.com",
-    role: "user",
-    badge: "ผู้เข้าร่วมงาน",
-    desc: "ซื้อบัตร, สั่งเสื้อ, ดู QR Ticket, ใช้ Wallet",
-  },
-  {
-    label: "Super Admin",
-    email: "superadmin@demo.com",
-    role: "super_admin",
-    badge: "ผู้ดูแลสูงสุด",
-    desc: "ตรวจสลิป, อนุมัติบัตร, รายงาน, สแกน Check-in",
-  },
-  {
-    label: "Event Admin",
-    email: "tokenadmin@demo.com",
-    role: "token_admin",
-    badge: "จุดเติมเงิน",
-    desc: "จุดบริการเติม Token ให้ผู้ร่วมงาน",
-  },
-  {
-    label: "Store Admin",
-    email: "store1@demo.com",
-    role: "store_admin",
-    badge: "ร้านค้าในงาน",
-    desc: "สร้าง QR ขายของ, รับชำระด้วย Token",
   },
 ];
 
@@ -174,10 +137,10 @@ export default function Home() {
               {/* Call to Actions using Original Website Brand Theme */}
               <div className="flex items-center gap-3.5 sm:gap-4 flex-wrap">
                 <Link
-                  to="/tickets"
+                  to={user ? "/tickets" : "/login?redirect=/tickets"}
                   className="inline-flex items-center justify-center rounded-xl bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white font-bold px-7 sm:px-8 py-3.5 text-sm sm:text-base shadow-lg shadow-brand-600/30 transition-all duration-200 hover:scale-[1.02]"
                 >
-                  จองตั๋วเลย
+                  ซื้อตั๋วเลย
                 </Link>
 
                 <a

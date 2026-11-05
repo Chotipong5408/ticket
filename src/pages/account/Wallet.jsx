@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { QrBox } from "../../components/QrBox";
 import { useAuth } from "../../context/AuthContext";
@@ -5,15 +6,16 @@ import { walletSummary } from "../../services/tokenService";
 import { formatToken } from "../../lib/money";
 import { encodeQr } from "../../lib/qr";
 import { useLiveData } from "../../hooks/useLiveData";
+import { UserQrModal } from "../../components/UserQrModal";
 import {
   Wallet,
   Coins,
-  ArrowUpRight,
   ArrowDownLeft,
   Gift,
   ShieldAlert,
   Sparkles,
   History,
+  QrCode,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -21,6 +23,7 @@ export default function AccountWallet() {
   useLiveData();
   const { user } = useAuth();
   const w = walletSummary(user.id);
+  const [qrOpen, setQrOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -63,12 +66,13 @@ export default function AccountWallet() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Link
-              to="/scan-payment"
+            <button
+              type="button"
+              onClick={() => setQrOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl bg-brand-500 hover:bg-brand-400 text-slate-900 font-bold px-5 py-3 text-xs shadow-lg transition"
             >
-              <ArrowUpRight className="h-4 w-4" /> สแกนจ่ายร้านค้า
-            </Link>
+              <QrCode className="h-4 w-4" /> เปิด QR ชำระเงิน
+            </button>
           </div>
         </div>
       </div>
@@ -130,23 +134,31 @@ export default function AccountWallet() {
         </div>
       </div>
 
-      {/* QR for Top-up & Policy */}
+      {/* QR for Payment/Top-up & Policy */}
       <div className="grid gap-6 md:grid-cols-2 items-start">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm text-center">
           <h3 className="font-bold text-slate-800 text-sm mb-1">
-            QR ประจำตัวสำหรับเติม Token
+            QR ประจำตัว — ชำระเงินและเติม Token
           </h3>
           <p className="text-xs text-slate-400 mb-4">
-            แสดง QR Code นี้แก่เจ้าหน้าที่จุดเติม Token (Event Admin)
-            เพื่อเติมเงินเข้ากระเป๋า
+            ยื่น QR นี้ให้ร้านค้าในงานสแกนตัด Token หรือให้เจ้าหน้าที่จุดเติมเงิน (Event Admin) สแกนเพิ่มยอด
           </p>
-          <div className="flex justify-center">
-            <QrBox
-              value={encodeQr("user", user.id)}
-              label="User Token QR"
-              caption={`บัญชี: ${user.fullName}`}
-              downloadName={`${user.id}-topup-qr.png`}
-            />
+          <div className="flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setQrOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold px-5 py-2.5 text-xs shadow transition"
+            >
+              <QrCode className="h-4 w-4" /> แสดง QR เต็มจอ
+            </button>
+            <div className="flex justify-center">
+              <QrBox
+                value={encodeQr("user", user.id)}
+                label="User Token QR"
+                caption={`บัญชี: ${user.fullName}`}
+                downloadName={`${user.id}-payment-qr.png`}
+              />
+            </div>
           </div>
         </div>
 
@@ -184,6 +196,9 @@ export default function AccountWallet() {
           </div>
         </div>
       </div>
+
+      {/* QR Modal */}
+      <UserQrModal open={qrOpen} onClose={() => setQrOpen(false)} user={user} />
     </div>
   );
 }

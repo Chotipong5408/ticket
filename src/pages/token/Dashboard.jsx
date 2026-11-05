@@ -9,7 +9,7 @@ import {
   ScanLine,
   History,
   ArrowRight,
-  ShieldCheck,
+  Ticket,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -49,7 +49,13 @@ export default function TokenDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Link
+              to="/admin/checkin"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-bold px-4 py-2.5 shadow transition"
+            >
+              <Ticket className="h-4 w-4" /> ตรวจบัตรเข้างาน
+            </Link>
             <Link
               to="/token-admin/topup"
               className="inline-flex items-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-bold px-4 py-2.5 shadow transition"
@@ -60,7 +66,7 @@ export default function TokenDashboard() {
               to="/token-admin/scan"
               className="inline-flex items-center gap-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold px-4 py-2.5 border border-white/20 backdrop-blur-sm transition"
             >
-              <ScanLine className="h-4 w-4" /> สแกนตรวจสอบ
+              <ScanLine className="h-4 w-4" /> สแกน Token
             </Link>
           </div>
         </div>
@@ -115,7 +121,27 @@ export default function TokenDashboard() {
       </div>
 
       {/* Quick Action Navigation */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Link
+          to="/admin/checkin"
+          className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 group-hover:scale-105 transition-transform">
+              <Ticket className="h-6 w-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800 text-sm group-hover:text-emerald-600 transition-colors">
+                ตรวจบัตรเข้างาน (Check-in)
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                สแกน QR Ticket ของผู้เข้าร่วมงาน ณ ซุ้มประตู
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+        </Link>
+
         <Link
           to="/token-admin/topup"
           className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-amber-300 transition-all flex items-center justify-between"

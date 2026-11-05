@@ -165,7 +165,7 @@ export function quoteCart(userId) {
   const subtotalTickets = ticketLines.reduce((s, l) => s + l.lineTotal, 0)
   const subtotalMerchandise = merchLines.reduce((s, l) => s + l.lineTotal, 0)
   const hasMerch = merchLines.length > 0
-  const shippingMethod = hasMerch ? cart.shippingMethod || 'pickup' : null
+  const shippingMethod = hasMerch ? (cart.shippingMethod === 'pickup' && !cart.shipping?.address ? 'delivery' : cart.shippingMethod || 'delivery') : null
   const shippingFee = hasMerch && shippingMethod === 'delivery' ? Number(settings.shippingFee || 0) : 0
   const totalAmount = subtotalTickets + subtotalMerchandise + shippingFee
   const expectedBonusToken = ticketLines.reduce((s, l) => s + l.bonusTotal, 0)
@@ -204,7 +204,18 @@ export function checkout(user) {
     subtotalMerchandise: quote.subtotalMerchandise,
     shippingFee: quote.shippingFee,
     shippingMethod: quote.shippingMethod,
-    shipping: quote.shippingMethod === 'delivery' ? quote.shipping : quote.shippingMethod === 'pickup' ? { recipientName: user.fullName, phone: user.phone } : null,
+    shipping:
+      quote.shippingMethod === 'delivery'
+        ? quote.shipping
+        : quote.shippingMethod === 'pickup'
+          ? {
+              recipientName: quote.shipping?.recipientName || user.fullName,
+              phone: quote.shipping?.phone || user.phone,
+              address: quote.shipping?.address || '',
+              province: quote.shipping?.province || '',
+              postalCode: quote.shipping?.postalCode || '',
+            }
+          : null,
     totalAmount: quote.totalAmount,
     expectedBonusToken: quote.expectedBonusToken,
     paymentId,
@@ -304,12 +315,12 @@ export function checkout(user) {
       orderId,
       userId: user.id,
       items: quote.merchLines,
-      shippingMethod: quote.shippingMethod,
+      shippingMethod: quote.shippingMethod || 'delivery',
       recipientName: order.shipping?.recipientName || user.fullName,
       phone: order.shipping?.phone || user.phone,
-      address: order.shipping?.address || '',
-      province: order.shipping?.province || '',
-      postalCode: order.shipping?.postalCode || '',
+      address: order.shipping?.address || quote.shipping?.address || '',
+      province: order.shipping?.province || quote.shipping?.province || '',
+      postalCode: order.shipping?.postalCode || quote.shipping?.postalCode || '',
       status: 'pending_payment',
       fulfillmentStatus: quote.shippingMethod === 'delivery' ? 'awaiting_shipment' : 'awaiting_pickup',
       createdAt: now,

@@ -14,7 +14,6 @@ import Tickets from "./pages/Tickets";
 import MerchandisePage from "./pages/Merchandise";
 import Checkout from "./pages/Checkout";
 import Payment from "./pages/Payment";
-import ScanPayment from "./pages/ScanPayment";
 
 /* User account pages */
 import AccountHome from "./pages/account/AccountHome";
@@ -51,7 +50,6 @@ import TokenScan from "./pages/token/Scan";
 /* Store Admin pages */
 import StoreDashboard from "./pages/store/Dashboard";
 import StoreProduct from "./pages/store/Product";
-import StorePaymentRequests from "./pages/store/PaymentRequests";
 import StoreScanPayment from "./pages/store/ScanPayment";
 import StoreTransactions from "./pages/store/Transactions";
 import StoreReports from "./pages/store/Reports";
@@ -80,7 +78,7 @@ export default function App() {
       >
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/payment/:paymentId" element={<Payment />} />
-        <Route path="/scan-payment" element={<ScanPayment />} />
+        <Route path="/scan-payment" element={<Navigate to="/account/wallet" replace />} />
 
         {/* User account */}
         <Route path="/account" element={<AccountHome />} />
@@ -183,7 +181,15 @@ export default function App() {
         <Route
           path="/admin/checkin"
           element={
-            <RequireRole roles={["super_admin"]}>
+            <RequireRole roles={["super_admin", "token_admin"]}>
+              <AdminCheckin />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/token-admin/checkin"
+          element={
+            <RequireRole roles={["super_admin", "token_admin"]}>
               <AdminCheckin />
             </RequireRole>
           }
@@ -266,11 +272,7 @@ export default function App() {
         />
         <Route
           path="/store/payment-requests"
-          element={
-            <RequireRole roles={["super_admin", "store_admin"]}>
-              <StorePaymentRequests />
-            </RequireRole>
-          }
+          element={<Navigate to="/store/scan-payment" replace />}
         />
         <Route
           path="/store/scan-payment"

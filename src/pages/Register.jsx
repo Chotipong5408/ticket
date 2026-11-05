@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
-import { UserPlus, GraduationCap, ArrowRight, ShieldCheck } from 'lucide-react'
+import { UserPlus } from 'lucide-react'
+import { FACULTIES, getMajorsByFaculty } from '../data/faculties'
 
 export default function Register() {
   const { register, user } = useAuth()
@@ -27,6 +28,18 @@ export default function Register() {
   }
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
+
+  const handleFacultyChange = (e) => {
+    const nextFaculty = e.target.value
+    const majors = getMajorsByFaculty(nextFaculty)
+    setForm((prev) => ({
+      ...prev,
+      faculty: nextFaculty,
+      major: majors.includes(prev.major) ? prev.major : '',
+    }))
+  }
+
+  const availableMajors = getMajorsByFaculty(form.faculty)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -116,14 +129,19 @@ export default function Register() {
               <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
                 คณะ <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
+              <select
                 className={`input ${errors.faculty ? 'border-red-400 ring-red-300' : ''}`}
                 value={form.faculty}
-                onChange={set('faculty')}
-                placeholder="เช่น วิศวกรรมศาสตร์"
+                onChange={handleFacultyChange}
                 required
-              />
+              >
+                <option value="">-- เลือกคณะ --</option>
+                {FACULTIES.map((f) => (
+                  <option key={f.name} value={f.name}>
+                    {f.name}
+                  </option>
+                ))}
+              </select>
               {errors.faculty && <p className="mt-1 text-xs text-red-600">{errors.faculty}</p>}
             </div>
 
@@ -131,14 +149,22 @@ export default function Register() {
               <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
                 สาขาวิชา <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
+              <select
                 className={`input ${errors.major ? 'border-red-400 ring-red-300' : ''}`}
                 value={form.major}
                 onChange={set('major')}
-                placeholder="เช่น วิศวกรรมคอมพิวเตอร์"
+                disabled={!form.faculty}
                 required
-              />
+              >
+                <option value="">
+                  {form.faculty ? '-- เลือกสาขาวิชา --' : '-- กรุณาเลือกคณะก่อน --'}
+                </option>
+                {availableMajors.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
               {errors.major && <p className="mt-1 text-xs text-red-600">{errors.major}</p>}
             </div>
           </div>

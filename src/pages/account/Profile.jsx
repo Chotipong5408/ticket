@@ -4,7 +4,8 @@ import { useAuth } from '../../context/AuthContext'
 import { updateProfile } from '../../services/authService'
 import { useToast } from '../../context/ToastContext'
 import { formatDateTime } from '../../lib/dates'
-import { User, Check, ShieldCheck, Mail, Calendar, School, Phone } from 'lucide-react'
+import { User } from 'lucide-react'
+import { FACULTIES, getMajorsByFaculty } from '../../data/faculties'
 
 export default function Profile() {
   const { user } = useAuth()
@@ -99,23 +100,42 @@ export default function Profile() {
               <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
                 คณะ
               </label>
-              <input
+              <select
                 className="input"
                 value={form.faculty}
-                onChange={(e) => setForm({ ...form, faculty: e.target.value })}
+                onChange={(e) => {
+                  const fac = e.target.value
+                  const majors = getMajorsByFaculty(fac)
+                  setForm({
+                    ...form,
+                    faculty: fac,
+                    major: majors.includes(form.major) ? form.major : '',
+                  })
+                }}
                 required
-              />
+              >
+                <option value="">-- เลือกคณะ --</option>
+                {FACULTIES.map((f) => (
+                  <option key={f.name} value={f.name}>{f.name}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
                 สาขาวิชา
               </label>
-              <input
+              <select
                 className="input"
                 value={form.major}
                 onChange={(e) => setForm({ ...form, major: e.target.value })}
+                disabled={!form.faculty}
                 required
-              />
+              >
+                <option value="">{form.faculty ? '-- เลือกสาขาวิชา --' : '-- กรุณาเลือกคณะก่อน --'}</option>
+                {getMajorsByFaculty(form.faculty).map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
             </div>
           </div>
 

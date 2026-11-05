@@ -237,7 +237,7 @@ export default function StorePaymentRequests() {
             ) : (
               <>
                 <div className="text-center">
-                  <p className="text-sm text-slate-500">ให้ลูกค้าเปิดสแกน QR ผ่านเมนู &quot;สแกนจ่ายร้านค้า&quot;</p>
+                  <p className="text-sm text-slate-500">ให้ลูกค้าเปิดหน้า Token Wallet แล้วกด &quot;เปิด QR ชำระเงิน&quot; แสดง QR ให้ร้านค้าสแกน</p>
                   <p className="text-2xl font-bold text-brand-700">{formatToken(currentReqInDb.amountToken)}</p>
                 </div>
 

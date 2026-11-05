@@ -10,13 +10,14 @@ import {
   requestsRepo,
   checkinsRepo,
   usersRepo,
+  merchOrdersRepo,
 } from '../../repositories'
 import { exportGenericCsv, exportMerchandiseCsv } from '../../services/reportService'
 import { formatTHB, formatToken } from '../../lib/money'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useLiveData } from '../../hooks/useLiveData'
-import { BarChart3, Download, TrendingUp, CreditCard, Ticket, Store, ScanLine, Coins } from 'lucide-react'
+import { BarChart3, Download, CreditCard, ScanLine, Shirt } from 'lucide-react'
 
 export default function AdminReports() {
   useLiveData()
@@ -43,6 +44,64 @@ export default function AdminReports() {
       .reduce((sum, r) => sum + r.amountToken, 0),
   }))
 
+  const merchStats = useMemo(() => {
+    const orders = ordersRepo.all()
+    const approvedOrderIds = new Set(
+      orders.filter((o) => o.status === 'approved').map((o) => o.id)
+    )
+    const merchOrders = merchOrdersRepo.all()
+
+    let totalRevenue = 0
+    let totalPieces = 0
+    const sizeMap = { S: 0, M: 0, L: 0, XL: 0, '2XL': 0, '3XL': 0 }
+    const sizeRevenueMap = { S: 0, M: 0, L: 0, XL: 0, '2XL': 0, '3XL': 0 }
+
+    let awaitingShipment = 0
+    let shipped = 0
+    let awaitingPickup = 0
+
+    merchOrders.forEach((m) => {
+      const isApproved = approvedOrderIds.has(m.orderId) || m.status === 'confirmed'
+      if (m.fulfillmentStatus === 'awaiting_shipment') awaitingShipment++
+      if (m.fulfillmentStatus === 'shipped') shipped++
+      if (m.fulfillmentStatus === 'awaiting_pickup' || m.fulfillmentStatus === 'ready_for_pickup') awaitingPickup++
+
+      m.items.forEach((item) => {
+        const qty = item.quantity || 0
+        const rev = (item.unitPrice || 0) * qty
+        if (isApproved) {
+          totalRevenue += rev
+        }
+        totalPieces += qty
+        if (sizeMap[item.size] !== undefined) {
+          sizeMap[item.size] += qty
+          if (isApproved) sizeRevenueMap[item.size] += rev
+        } else {
+          sizeMap[item.size] = (sizeMap[item.size] || 0) + qty
+          if (isApproved) sizeRevenueMap[item.size] = (sizeRevenueMap[item.size] || 0) + rev
+        }
+      })
+    })
+
+    return {
+      totalRevenue,
+      totalPieces,
+      sizeMap,
+      sizeRevenueMap,
+      awaitingShipment,
+      shipped,
+      awaitingPickup,
+      totalOrders: merchOrders.length,
+    }
+  }, [])
+
+  const merchChartData = useMemo(() => {
+    return Object.entries(merchStats.sizeRevenueMap).map(([size, value]) => ({
+      name: `ไซส์ ${size}`,
+      value,
+    }))
+  }, [merchStats])
+
   function dump(name, rows, type) {
     try {
       exportGenericCsv(user, name, rows, type)
@@ -54,10 +113,8 @@ export default function AdminReports() {
 
   const tabLabels = {
     tickets: 'ยอดขายบัตร (บาท)',
-    payments: 'สถานะการชำระเงิน',
-    tokens: 'สถิติ Token',
+    merch: 'ยอดขายเสื้อ (บาท)',
     stores: 'ยอดขายร้านค้า (Token)',
-    checkin: 'การเข้างาน (Check-in)',
   }
 
   return (
@@ -72,7 +129,7 @@ export default function AdminReports() {
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap gap-2">
-            {['tickets', 'stores'].map((t) => (
+            {['tickets', 'merch', 'stores'].map((t) => (
               <button
                 key={t}
                 className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
@@ -92,7 +149,7 @@ export default function AdminReports() {
 
         <div className="h-72 w-full pt-4">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={tab === 'stores' ? storeData : ticketData}>
+            <BarChart data={tab === 'stores' ? storeData : tab === 'merch' ? merchChartData : ticketData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} />
               <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
@@ -104,8 +161,13 @@ export default function AdminReports() {
                   boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                   fontSize: '12px',
                 }}
+                formatter={(val) => [tab === 'stores' ? `${formatToken(val)} Token` : formatTHB(val), 'ยอดรวม']}
               />
-              <Bar dataKey="value" fill="#2563eb" radius={[6, 6, 0, 0]} />
+              <Bar
+                dataKey="value"
+                fill={tab === 'stores' ? '#10b981' : tab === 'merch' ? '#6366f1' : '#2563eb'}
+                radius={[6, 6, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -189,7 +251,24 @@ export default function AdminReports() {
               }
             }}
           >
-            CSV รายการเสื้อ
+            CSV รายการเสื้อ (คำสั่งซื้อ)
+          </button>
+          <button
+            className="btn-secondary text-xs"
+            type="button"
+            onClick={() =>
+              dump(
+                'merchandise-summary-by-size.csv',
+                Object.entries(merchStats.sizeMap).map(([size, count]) => ({
+                  ไซส์: size,
+                  จำนวนสั่งซื้อ: count,
+                  ยอดขายรวม: formatTHB(merchStats.sizeRevenueMap[size] || 0),
+                })),
+                'merchandise_summary'
+              )
+            }
+          >
+            CSV สรุปยอดขายเสื้อตามไซส์
           </button>
           <button
             className="btn-secondary text-xs"
@@ -222,7 +301,7 @@ export default function AdminReports() {
       </div>
 
       {/* Summary Stat Cards */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-3">
           <h2 className="font-bold text-slate-800 text-sm flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-brand-600" />
@@ -241,6 +320,50 @@ export default function AdminReports() {
                 </div>
               )
             })}
+          </div>
+        </div>
+
+        {/* Merchandise Sales Stat Card */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <Shirt className="h-4 w-4 text-indigo-600" />
+              <span>สรุปยอดขายเสื้อที่ระลึก</span>
+            </h2>
+            <span className="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
+              {formatTHB(merchStats.totalRevenue)}
+            </span>
+          </div>
+
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between py-1.5 border-b border-slate-100">
+              <span className="text-slate-600">จำนวนเสื้อที่สั่งทั้งหมด</span>
+              <span className="font-bold text-slate-800">{merchStats.totalPieces} ตัว</span>
+            </div>
+            <div className="flex justify-between py-1.5 border-b border-slate-100">
+              <span className="text-slate-600">คำสั่งซื้อเสื้อทั้งหมด</span>
+              <span className="font-bold text-slate-800">{merchStats.totalOrders} ออเดอร์</span>
+            </div>
+            <div className="flex justify-between py-1.5 border-b border-slate-100">
+              <span className="text-slate-600">รอจัดส่งพัสดุ</span>
+              <span className="font-bold text-amber-600">{merchStats.awaitingShipment} รายการ</span>
+            </div>
+            <div className="flex justify-between py-1.5 border-b border-slate-100">
+              <span className="text-slate-600">จัดส่งแล้ว</span>
+              <span className="font-bold text-emerald-600">{merchStats.shipped} รายการ</span>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">ยอดสั่งแยกตามไซส์</p>
+            <div className="grid grid-cols-3 gap-2">
+              {Object.entries(merchStats.sizeMap).map(([size, count]) => (
+                <div key={size} className="rounded-xl bg-slate-50 border border-slate-100 p-2 text-center">
+                  <span className="block font-bold text-xs text-slate-700">{size}</span>
+                  <span className="block text-[11px] font-semibold text-indigo-600">{count} ตัว</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

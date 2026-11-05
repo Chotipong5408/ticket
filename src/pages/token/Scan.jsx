@@ -5,7 +5,7 @@ import { decodeQr } from '../../lib/qr'
 import { usersRepo, ticketsRepo } from '../../repositories'
 import { walletSummary } from '../../services/tokenService'
 import { formatToken } from '../../lib/money'
-import { ScanLine, User, Wallet, Coins, ArrowRight } from 'lucide-react'
+import { ScanLine, User, Coins } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export default function TokenScan() {
@@ -91,7 +91,7 @@ export default function TokenScan() {
 
               <div className="pt-2">
                 <Link
-                  to="/token-admin/topup"
+                  to={`/token-admin/topup?userId=${user.id}`}
                   className="btn-primary w-full py-2.5 text-xs font-bold gap-2 text-center flex items-center justify-center"
                 >
                   <Coins className="h-4 w-4" /> ไปหน้าเติม Token ให้ผู้ใช้นี้
