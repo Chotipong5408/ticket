@@ -21,9 +21,9 @@ export function DataTable({ columns, rows, searchKeys = [], pageSize = 8, filter
     <div className="space-y-4 animate-fade-in">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
           <input
-            className="input pl-9"
+            className="input pl-10"
             placeholder="ค้นหา..."
             value={q}
             onChange={(e) => { setQ(e.target.value); setPage(1) }}

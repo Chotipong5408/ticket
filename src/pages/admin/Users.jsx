@@ -71,18 +71,18 @@ export default function AdminUsers() {
       <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid gap-3 sm:grid-cols-12">
           <div className="relative sm:col-span-8">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
             <input
-              className="input pl-9 text-xs"
+              className="input pl-10 text-xs"
               placeholder="ค้นหาด้วยชื่อ, อีเมล, Ticket ID หรือ Order ID..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
           <div className="relative sm:col-span-4">
-            <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
             <input
-              className="input pl-9 text-xs"
+              className="input pl-10 text-xs"
               placeholder="พ.ศ. เข้าเรียน เช่น 2545"
               value={year}
               onChange={(e) => setYear(e.target.value)}

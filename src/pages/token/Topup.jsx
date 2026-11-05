@@ -103,9 +103,9 @@ export default function TokenTopup() {
             </label>
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                 <input
-                  className="input pl-9 text-xs"
+                  className="input pl-10 text-xs"
                   placeholder="เช่น 0812345678, user@example.com หรือชื่อ..."
                   value={q}
                   onChange={(e) => setQ(e.target.value)}

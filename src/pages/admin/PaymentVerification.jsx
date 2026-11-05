@@ -98,9 +98,9 @@ export default function PaymentVerification() {
       <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
             <input
-              className="input pl-9 text-xs"
+              className="input pl-10 text-xs"
               placeholder="ค้นหา Order ID / ชื่อ / อีเมล..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
