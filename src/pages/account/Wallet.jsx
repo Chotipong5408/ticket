@@ -51,7 +51,6 @@ export default function AccountWallet() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 text-brand-300 text-xs font-semibold uppercase tracking-wider mb-2">
-              <Sparkles className="h-4 w-4" />
               <span>ยอดคงเหลือที่สามารถใช้ได้</span>
             </div>
             <div className="flex items-baseline gap-2">
@@ -67,11 +66,21 @@ export default function AccountWallet() {
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <div className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 backdrop-blur-md px-3 py-1 border border-white/15 text-xs text-brand-200">
                 <Coins className="h-3.5 w-3.5 text-amber-300" />
-                <span>เรทระบบ: <strong className="text-white font-bold">1 Token = {tokenRate} บาท</strong></span>
+                <span>
+                  เรทระบบ:{" "}
+                  <strong className="text-white font-bold">
+                    1 Token = {tokenRate} บาท
+                  </strong>
+                </span>
               </div>
               <div className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 backdrop-blur-md px-3 py-1 border border-white/15 text-xs text-brand-200">
                 <Banknote className="h-3.5 w-3.5 text-emerald-300" />
-                <span>มูลค่าเทียบเท่า: <strong className="text-emerald-300 font-bold">{formatTHB(w.balance * tokenRate)}</strong></span>
+                <span>
+                  มูลค่าเทียบเท่า:{" "}
+                  <strong className="text-emerald-300 font-bold">
+                    {formatTHB(w.balance * tokenRate)}
+                  </strong>
+                </span>
               </div>
             </div>
 
@@ -102,8 +111,13 @@ export default function AccountWallet() {
               <Coins className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">อัตราแลกเปลี่ยน Token ตามระบบ</h3>
-              <p className="text-xs text-slate-500">กำหนดโดยผู้ดูแลระบบ (Super Admin) สำหรับการใช้จ่ายและเติมเงินในงาน</p>
+              <h3 className="font-bold text-slate-900 text-sm">
+                อัตราแลกเปลี่ยน Token ตามระบบ
+              </h3>
+              <p className="text-xs text-slate-500">
+                กำหนดโดยผู้ดูแลระบบ (Super Admin)
+                สำหรับการใช้จ่ายและเติมเงินในงาน
+              </p>
             </div>
           </div>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 font-black text-sm self-start sm:self-auto">
@@ -113,7 +127,8 @@ export default function AccountWallet() {
           </div>
         </div>
         <p className="text-[11px] text-slate-400 mt-3">
-          * สมาชิกสามารถยื่น QR Code ประจำตัวที่จุดบริการ Event Admin เพื่อชำระเงินสดและเติม Token เข้ากระเป๋าได้ทันที
+          * สมาชิกสามารถยื่น QR Code ประจำตัวที่จุดบริการ Event Admin
+          เพื่อชำระเงินสดและเติม Token เข้ากระเป๋าได้ทันที
         </p>
       </div>
 
@@ -181,7 +196,8 @@ export default function AccountWallet() {
             QR ประจำตัว — ชำระเงินและเติม Token
           </h3>
           <p className="text-xs text-slate-400 mb-4">
-            ยื่น QR นี้ให้ร้านค้าในงานสแกนตัด Token หรือให้เจ้าหน้าที่จุดเติมเงิน (Event Admin) สแกนเพิ่มยอด
+            ยื่น QR นี้ให้ร้านค้าในงานสแกนตัด Token
+            หรือให้เจ้าหน้าที่จุดเติมเงิน (Event Admin) สแกนเพิ่มยอด
           </p>
           <div className="flex flex-col items-center gap-3">
             <button
