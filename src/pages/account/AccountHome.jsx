@@ -140,7 +140,7 @@ export default function AccountHome() {
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className="rounded-full bg-brand-600 text-white px-3 py-1 text-xs font-black uppercase tracking-wider shadow-sm">
-                    ⭐ จำเป็นสำหรับเข้างาน
+                    จำเป็นสำหรับเข้างาน
                   </span>
                   {issuedTickets.length > 0 && (
                     <span className="rounded-full bg-emerald-100 text-emerald-800 px-2.5 py-0.5 text-[10px] font-bold">
@@ -195,7 +195,7 @@ export default function AccountHome() {
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className="rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 text-xs font-black uppercase tracking-wider shadow-sm">
-                    ✨ เสื้อรุ่นลิมิเต็ด 2026
+                    เสื้อรุ่นลิมิเต็ด 2026
                   </span>
                   {userMerchOrders.length > 0 && (
                     <span className="rounded-full bg-purple-100 text-purple-800 px-2.5 py-0.5 text-[10px] font-bold">
