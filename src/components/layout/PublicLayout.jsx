@@ -48,7 +48,7 @@ export default function PublicLayout() {
       </main>
       <footer className="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-400">
         <p className="mt-1.5 text-slate-300">
-          © 2026 Alumni Reunion Management System
+          © 2026 Ticket Registration & Sales System
         </p>
       </footer>
     </div>

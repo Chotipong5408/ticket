@@ -62,11 +62,13 @@ export function addMerchToCart(userId, productId, size, quantity) {
   if (!product.sizes.includes(size)) throw new Error('ขนาดไม่ถูกต้อง')
   const qty = Number(quantity)
   if (!Number.isInteger(qty) || qty < 1) throw new Error('จำนวนไม่ถูกต้อง')
-  if (product.stockEnabled && (product.stockBySize[size] || 0) < qty) {
-    throw new Error('สต็อกไม่เพียงพอ')
-  }
   const cart = cartsRepo.get(userId)
   const i = cart.merchandise.findIndex((m) => m.productId === productId && m.size === size)
+  const inCart = i >= 0 ? cart.merchandise[i].quantity : 0
+  if (product.stockEnabled && (product.stockBySize[size] || 0) < inCart + qty) {
+    const avail = product.stockBySize[size] || 0
+    throw new Error(`สต็อกไซส์ ${size} มีเหลือเพียง ${avail} ชิ้น${inCart > 0 ? ` (ในตะกร้ามีแล้ว ${inCart} ชิ้น)` : ''}`)
+  }
   if (i >= 0) cart.merchandise[i].quantity += qty
   else cart.merchandise.push({ productId, size, quantity: qty })
   return cartsRepo.save(userId, cart)

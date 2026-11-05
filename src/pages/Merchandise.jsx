@@ -12,6 +12,8 @@ import {
   Shirt,
   ShoppingCart,
   Ticket,
+  Plus,
+  Minus,
 } from "lucide-react";
 
 export default function Merchandise() {
@@ -37,7 +39,17 @@ export default function Merchandise() {
   function add(p) {
     if (!user) return nav("/login");
     const selectedSize = size[p.id] || p.sizes?.[0] || "L";
-    const selectedQty = qty[p.id] || 1;
+    const availableStock = p.stockEnabled ? (p.stockBySize?.[selectedSize] || 0) : 50;
+    const selectedQty = Math.max(1, parseInt(qty[p.id], 10) || 1);
+
+    if (p.stockEnabled && availableStock <= 0) {
+      toast.push(`ขออภัย สินค้าไซส์ ${selectedSize} หมดชั่วคราว`, "error");
+      return;
+    }
+    if (p.stockEnabled && selectedQty > availableStock) {
+      toast.push(`ขออภัย ไซส์ ${selectedSize} มีสินค้าเหลือเพียง ${availableStock} ชิ้น`, "error");
+      return;
+    }
     try {
       addMerchToCart(user.id, p.id, selectedSize, selectedQty);
       toast.push(
@@ -97,7 +109,10 @@ export default function Merchandise() {
         <div className="grid gap-6 md:grid-cols-2">
           {products.map((p) => {
             const currentSize = size[p.id] || p.sizes?.[0] || "L";
-            const currentQty = qty[p.id] || 1;
+            const availableStock = p.stockEnabled ? (p.stockBySize?.[currentSize] || 0) : 50;
+            const maxQty = p.stockEnabled ? Math.max(0, availableStock) : 50;
+            const isOutOfStock = p.stockEnabled && availableStock <= 0;
+            const currentQty = isOutOfStock ? 0 : Math.min(maxQty, Math.max(1, parseInt(qty[p.id], 10) || 1));
 
             return (
               <div
@@ -132,18 +147,29 @@ export default function Merchandise() {
                         const stock = p.stockEnabled
                           ? p.stockBySize?.[s] || 0
                           : null;
-                        const isOutOfStock = p.stockEnabled && stock <= 0;
+                        const isSizeOutOfStock = p.stockEnabled && stock <= 0;
 
                         return (
                           <button
                             key={s}
                             type="button"
-                            disabled={isOutOfStock}
-                            onClick={() => setSize({ ...size, [p.id]: s })}
+                            disabled={isSizeOutOfStock}
+                            onClick={() => {
+                              setSize({ ...size, [p.id]: s });
+                              const sStock = p.stockEnabled ? (p.stockBySize?.[s] || 0) : 50;
+                              const current = parseInt(qty[p.id], 10) || 1;
+                              if (sStock <= 0) {
+                                setQty({ ...qty, [p.id]: 0 });
+                              } else if (current > sStock) {
+                                setQty({ ...qty, [p.id]: sStock });
+                              } else if (current < 1) {
+                                setQty({ ...qty, [p.id]: 1 });
+                              }
+                            }}
                             className={`min-w-[48px] rounded-xl px-3 py-2 text-xs font-bold transition-all border ${
                               isSelected
                                 ? "bg-brand-600 text-white border-brand-600 shadow-sm shadow-brand-500/20"
-                                : isOutOfStock
+                                : isSizeOutOfStock
                                   ? "bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed"
                                   : "bg-slate-50 text-slate-700 border-slate-200 hover:border-brand-300 hover:bg-brand-50/50"
                             }`}
@@ -162,33 +188,84 @@ export default function Merchandise() {
 
                   {/* Quantity selector */}
                   <div className="mt-4">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1.5">
-                      จำนวน
-                    </label>
-                    <input
-                      className="input w-28 text-center font-bold"
-                      type="number"
-                      min="1"
-                      max="50"
-                      value={currentQty}
-                      onChange={(e) =>
-                        setQty({
-                          ...qty,
-                          [p.id]: Math.max(1, Number(e.target.value) || 1),
-                        })
-                      }
-                    />
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
+                        จำนวน
+                      </label>
+                      {p.stockEnabled && (
+                        <span className="text-[11px] text-slate-400">
+                          สต็อกคงเหลือ: <strong className={availableStock > 0 ? "text-slate-700" : "text-red-500 font-bold"}>{availableStock} ชิ้น</strong>
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        disabled={isOutOfStock || currentQty <= 1}
+                        onClick={() => {
+                          const current = parseInt(qty[p.id], 10) || 1;
+                          setQty({ ...qty, [p.id]: Math.max(1, current - 1) });
+                        }}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                        title="ลดจำนวน"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <input
+                        className="input w-20 text-center font-bold disabled:bg-slate-100 disabled:text-slate-400"
+                        type="number"
+                        min="1"
+                        max={maxQty}
+                        disabled={isOutOfStock}
+                        value={isOutOfStock ? 0 : qty[p.id] !== undefined ? qty[p.id] : 1}
+                        onFocus={(e) => e.target.select()}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '') {
+                            setQty({ ...qty, [p.id]: '' });
+                          } else {
+                            const num = parseInt(val, 10);
+                            if (!isNaN(num)) {
+                              setQty({ ...qty, [p.id]: Math.min(maxQty, Math.max(0, num)) });
+                            }
+                          }
+                        }}
+                        onBlur={() => {
+                          const num = parseInt(qty[p.id], 10);
+                          if (isNaN(num) || num < 1) {
+                            setQty({ ...qty, [p.id]: maxQty > 0 ? 1 : 0 });
+                          } else if (num > maxQty) {
+                            setQty({ ...qty, [p.id]: maxQty });
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        disabled={isOutOfStock || currentQty >= maxQty}
+                        onClick={() => {
+                          const current = parseInt(qty[p.id], 10) || 1;
+                          setQty({ ...qty, [p.id]: Math.min(maxQty, current + 1) });
+                        }}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                        title="เพิ่มจำนวน"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-slate-100">
                   <button
-                    className="btn-primary w-full py-3 text-xs font-bold gap-2"
+                    className="btn-primary w-full py-3 text-xs font-bold gap-2 disabled:bg-slate-300 disabled:cursor-not-allowed"
                     type="button"
+                    disabled={isOutOfStock || maxQty <= 0}
                     onClick={() => add(p)}
                   >
-                    <ShoppingCart className="h-4 w-4" /> เพิ่มเสื้อลงตะกร้า (
-                    {formatTHB(p.price * currentQty)})
+                    <ShoppingCart className="h-4 w-4" />
+                    {isOutOfStock
+                      ? "สินค้าไซส์นี้หมดชั่วคราว"
+                      : `เพิ่มเสื้อลงตะกร้า (${formatTHB(p.price * currentQty)})`}
                   </button>
                 </div>
               </div>

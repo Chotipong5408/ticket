@@ -274,8 +274,7 @@ export default function AppLayout() {
 
         {/* Footer */}
         <footer className="border-t border-slate-200/60 bg-white/50 px-6 py-4 text-center text-xs text-slate-400">
-          ระบบ Demo — บันทึกข้อมูลและประมวลผลภายใน Browser (LocalStorage &
-          IndexedDB)
+          © 2026 Ticket Registration & Sales System
         </footer>
       </div>
     </div>
